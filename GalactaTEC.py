@@ -119,3 +119,5 @@ class game:
 
 if __name__ == "__main__":
   inst_galacta = galacta()
+
+  
