@@ -3,10 +3,14 @@ import tkinter as tk
 import random
 import sys
 
+from Factory import EnemyFactory
+
+
 class galacta:
   def __init__(self):
-    inst_init_menu = init_menu()
+    #inst_init_menu = init_menu()
     inst_game = game()
+    inst_game.run()
 
 
 class init_menu:
@@ -38,23 +42,6 @@ class Bullet:
     self.rect = self.image.get_rect()
     self.rect.center = ship.rect.center
 
-class Enemy:
-  def __init__(self):
-    self.image = pygame.image.load("Images/enemy.png")
-    self.image = pygame.transform.smoothscale(self.image, (70, 70))
-    self.rect = self.image.get_rect()
-    self.rect.center = (100, 100)
-  
-  def update(self):
-    self.rect.x += random.randint(-20,20)
-    self.rect.y += random.randint(-20,20)
-
-    self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
-    self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
-  
-  def draw(self, screen):
-    screen.blit(self.image, self.rect)
-
 class Ship:
   def __init__(self):
     self.image = pygame.image.load("Images/spaceship.png")
@@ -72,7 +59,6 @@ class Ship:
       self.rect.y -= self.speed
     if keys[pygame.K_DOWN]:
       self.rect.y += self.speed
-
     # Limitar la nave dentro de los límites de la pantalla
     self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
     self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
@@ -84,33 +70,58 @@ class Ship:
 class game:
   def __init__(self):
     pygame.init()
-    width = 800
-    height = 600
-    screen = pygame.display.set_mode((width, height))
+    self.width = 800
+    self.height = 600
+    self.screen = pygame.display.set_mode((self.width, self.height))
     pygame.display.set_caption("GalactaTEC")
-    background = pygame.Surface(screen.get_size())
-    background.fill((255, 255, 255))  # Blanco
-    inst_ship = Ship()
-    inst_enemy = Enemy()
-    running = True
-    while running:
+    self.background = pygame.Surface(self.screen.get_size())
+    self.background.fill((255, 255, 255))  # Blanco
+    self.inst_ship = Ship()
+    self.inst_enemies = EnemyFactory.create_enemies(6,6)
+    self.setup_counter = 0
+    self.t=0
+    self.running = True
+  
+
+  def run(self):
+    
+    while self.running:
     # Manejo de eventos
       for event in pygame.event.get():
         if event.type == pygame.QUIT:
-          running = False
+          self.running = False
 
     # Obtener estado del teclado
       keys = pygame.key.get_pressed()
 
     # Actualizar la nave según las teclas presionadas
-      inst_ship.update(keys)
-      inst_enemy.update()
+      self.inst_ship.update(keys)
+
+      
+      
+  
 
     # Dibujar todo
-      screen.blit(background, (0, 0))  # Dibujar fondo
-      inst_ship.draw(screen)  # Dibujar la nave en su nueva posición
-      inst_enemy.draw(screen)
+      self.screen.blit(self.background, (0, 0))  # Dibujar fondo
+      self.inst_ship.draw(self.screen)  # Dibujar la nave en su nueva posición
 
+      #"""
+      if self.t==60 and self.setup_counter<6:
+        for i in self.inst_enemies:#cambiar para que se dibujen para todos los enemigos
+          for j in i:
+            j.move_down()
+          #i.move(self.test,100) 
+          #self.test+=5
+          #i.draw(self.screen)
+        self.t=0
+        self.setup_counter+=1
+      self.t+=1
+      #"""
+
+      for i in self.inst_enemies:
+        for j in i:
+          j.draw(self.screen)
+              
     # Actualizar la pantalla
       pygame.display.flip()
 
