@@ -1,0 +1,20 @@
+[
+    {
+        "username": "gchacon8",
+        "password": "12345678",
+        "full_name": "JGabriel Chacon Alfaro",
+        "email": "gchacon8@estudiantec.com",
+        "photo": "Images/spaceship.png",
+        "ship": "Images/spaceship.png",
+        "music": "/ruta/al/archivo3.txt"
+    },
+    {
+        "username": "vale",
+        "password": "1111",
+        "full_name": "Valeria Morales",
+        "email": "valemorales07@estudiantec.com",
+        "photo": "Images/spaceship.png",
+        "ship": "Images/spaceship.png",
+        "music": "/ruta/al/archivo3.txt"
+    }
+]

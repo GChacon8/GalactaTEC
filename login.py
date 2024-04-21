@@ -1,6 +1,7 @@
 import tkinter as tk
 import menu
 from tkinter import messagebox
+import json
 
 class login:
     def __init__(self):
@@ -58,6 +59,20 @@ class login:
             messagebox.showwarning("Warning", "Please fill all the data to log in")
             return
         
+        # Cargar datos de usuarios desde el archivo JSON
+        with open("data.json") as json_file:
+            data = json.load(json_file)
+
+        # Verificar las credenciales con los datos del archivo JSON
+        for usuario in data:
+            if usuario["username"] == username and usuario["password"] == password:
+                self.window.destroy()
+                inst_init_menu = menu.init_menu()
+                return
+
+        # Si no se encuentra el usuario en el archivo JSON o las credenciales son incorrectas
+        messagebox.showerror("Error", "Wrong credentials. Please try again.")
         
+
 
 
