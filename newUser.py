@@ -3,9 +3,11 @@ from tkinter import filedialog, messagebox
 import menu
 from PIL import Image, ImageTk
 import json
+import re
 
 class User:
-    def __init__(self):
+    def __init__(self, key):
+        self.key = key
         self.window = tk.Tk()
         self.window.title("GalactaTEC")
         self.window.configure(bg="#120043")
@@ -68,8 +70,13 @@ class User:
         self.btn_select_music.place(relx=0.55, rely=0.7, anchor="center")
 
         #Crear
-        self.btnCreate = tk.Button(self.window, text=" ★ Create User ★ ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.createUser)
-        self.btnCreate.place(relx=0.5, rely=0.8, anchor="center") 
+        if(self.key == 0):
+            self.btnCreate = tk.Button(self.window, text=" ★ Create User ★ ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.createUser)
+            self.btnCreate.place(relx=0.5, rely=0.8, anchor="center") 
+
+        else:
+            self.btnCreate = tk.Button(self.window, text=" ★ Save Changes ★ ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.createUser)
+            self.btnCreate.place(relx=0.5, rely=0.8, anchor="center")
 
 
         self.window.mainloop()
@@ -150,29 +157,69 @@ class User:
             messagebox.showwarning("Warning", "Please fill all the data to create your user")
             return
         
+        if self.verify_password(password) == False:
+            messagebox.showwarning("Error", "Password must have:\n- Minimum 7 characters\n- You must use at least one capital letter\n- You must use at least one special symbol\n- You must use at least one number\n- You must use at least one lowercase letter")
+            return
+        
         # Cargar datos de usuarios desde el archivo JSON
         with open("data.json") as json_file:
             data = json.load(json_file)
 
         # Verificar las credenciales con los datos del archivo JSON
         for usuario in data:
-            if usuario["username"] == username and usuario["password"] == password:
+            if usuario["username"] == username or  usuario["email"] == email:
                 messagebox.showwarning("Warning", "This user already exists")
                 return
         
-        user = {"username": username, 
+        if (self.key == 0):
+            user = {"key": len(data),
+                "username": username, 
                 "password": password, 
                 "full_name": fullname,
                 "email": email,
                 "photo": photo,
                 "ship": ship,
                 "music": music}
+            
+            # Agregar el nuevo usuario a la lista de datos existentes
+            data.append(user)
+
+            # Escribir los datos actualizados en el archivo JSON
+            with open("data.json", "w") as json_file:
+                json.dump(data, json_file, indent=4)
+        else:
+            user = {"key": self.key,
+                "username": username, 
+                "password": password, 
+                "full_name": fullname,
+                "email": email,
+                "photo": photo,
+                "ship": ship,
+                "music": music}
+            
+            for usuario in data:
+                if usuario["key"] == self.key:
+                    usuario = user 
+
+            with open("data.json", "w") as json_file:
+                json.dump(data, json_file, indent=4)
         
-        # Agregar el nuevo usuario a la lista de datos existentes
-        data.append(user)
 
-        # Escribir los datos actualizados en el archivo JSON
-        with open("data.json", "w") as json_file:
-            json.dump(data, json_file, indent=4)
+    def verify_password(self, password):
+        # Verificar la longitud mínima de 7 caracteres
+        if len(password) < 7:
+            return False
 
-User()
+        # Verificar al menos una mayúscula, una minúscula, un número y un símbolo especial
+        if not re.search(r"[A-Z]", password):  # Al menos una mayúscula
+            return False
+        if not re.search(r"[a-z]", password):  # Al menos una minúscula
+            return False
+        if not re.search(r"\d", password):     # Al menos un número
+            return False
+        if not re.search(r"[!@#$%^&*()\-_=+{};:,<.>]", password):  # Al menos un símbolo especial
+            return False
+
+        return True
+
+User(1)

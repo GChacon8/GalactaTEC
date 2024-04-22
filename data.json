@@ -1,5 +1,6 @@
 [
     {
+        "key": 1,
         "username": "gchacon8",
         "password": "12345678",
         "full_name": "JGabriel Chacon Alfaro",
@@ -8,7 +9,7 @@
         "ship": "Images/spaceship.png",
         "music": "/ruta/al/archivo3.txt"
     },
-    {
+    {   "key": 2,
         "username": "vale",
         "password": "1111",
         "full_name": "Valeria Morales",

@@ -2,6 +2,7 @@ import tkinter as tk
 import menu
 from tkinter import messagebox
 import json
+import newUser
 
 class login:
     def __init__(self):
@@ -21,7 +22,7 @@ class login:
         self.lblCreateUser = tk.Label(self.window, text="If you don't own an account:", font=("Fixedsys", 15), bg="#120043", fg="white")
         self.lblCreateUser.place(relx=0.4, rely=0.2, anchor="center")
 
-        self.btnCreateUser = tk.Button(self.window, text="Create User", font=("Fixedsys", 10))
+        self.btnCreateUser = tk.Button(self.window, text="Create User", font=("Fixedsys", 10), command=createUser())
         self.btnCreateUser.place(relx=0.65, rely=0.2, anchor="center") 
 
         # Etiqueta y campo de entrada para el nombre de usuario
@@ -73,6 +74,10 @@ class login:
         # Si no se encuentra el usuario en el archivo JSON o las credenciales son incorrectas
         messagebox.showerror("Error", "Wrong credentials. Please try again.")
         
+    def createUser():
+        inst_newUser = newUser.User(0)
+         
+
 
 
 
