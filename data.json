@@ -9,13 +9,14 @@
         "ship": "Images/spaceship.png",
         "music": "/ruta/al/archivo3.txt"
     },
-    {   "key": 2,
+    {
+        "key": 2,
         "username": "vale",
-        "password": "1111",
+        "password": "Aaaaaa1*",
         "full_name": "Valeria Morales",
         "email": "valemorales07@estudiantec.com",
-        "photo": "Images/spaceship.png",
-        "ship": "Images/spaceship.png",
-        "music": "/ruta/al/archivo3.txt"
+        "photo": "Images/pp.png",
+        "ship": "Images/ships/ship1.png",
+        "music": "self.music_file"
     }
 ]

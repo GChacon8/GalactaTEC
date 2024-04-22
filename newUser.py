@@ -75,11 +75,53 @@ class User:
             self.btnCreate.place(relx=0.5, rely=0.8, anchor="center") 
 
         else:
-            self.btnCreate = tk.Button(self.window, text=" ★ Save Changes ★ ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.createUser)
-            self.btnCreate.place(relx=0.5, rely=0.8, anchor="center")
+            self.setOriginalValues()
+            self.btnCancel = tk.Button(self.window, text=" Cancelar ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.createUser)
+            self.btnCancel.place(relx=0.35, rely=0.8, anchor="center") 
+            
+            self.btnCreate = tk.Button(self.window, text=" ★ Save Changes ★ ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.saveChanges)
+            self.btnCreate.place(relx=0.6, rely=0.8, anchor="center")
 
 
         self.window.mainloop()
+
+    def setOriginalValues(self):
+
+        with open("data.json") as json_file:
+            data = json.load(json_file)
+
+        photo = ""
+        music = ""
+            
+        for usuario in data:
+            if usuario["key"] == self.key:
+                self.entry_username.insert(0, usuario["username"])
+                self.entry_name.insert(0, usuario["full_name"])
+                self.entry_email.insert(0, usuario["email"])
+                self.entry_password.insert(0,usuario ["password"])
+                photo = usuario["photo"]
+                music = usuario["music"]
+
+        self.OgPhoto = tk.Label(self.window, text=photo, font=("Fixedsys", 5), bg="#120043", fg="white")
+        self.OgPhoto.place(relx=0.4, rely=0.48, anchor="center")
+
+        self.music = tk.Label(self.window, text=music, font=("Fixedsys", 5), bg="#120043", fg="white")
+        self.music.place(relx=0.4, rely=0.73, anchor="center")
+
+        # Mostrar la foto de perfil actual
+        self.pic = tk.Label(self.window, background="#2b5a81")
+        self.pic.grid(row=0, column=0, padx=0, pady=0)
+        self.pic.place(relx=0.25, rely=0.25, anchor="center")
+
+        self.OgPhoto = tk.Label(self.window, text="Me", font=("Fixedsys", 10), bg="#120043", fg="white")
+        self.OgPhoto.place(relx=0.25, rely=0.33, anchor="center")
+
+        ppImage = Image.open(photo).resize((70,70))
+        ppPhoto = ImageTk.PhotoImage(ppImage)
+
+        self.pic.config(image=ppPhoto)
+        self.pic.image = ppPhoto
+
 
     def shipsCarousel(self):
         self.ship_images = [
@@ -147,10 +189,18 @@ class User:
         username = self.entry_username.get()
         fullname = self.entry_name.get()
         email = self.entry_email.get()
-        photo = "self.filename"
         ship = self.ship_images[self.current_index]
-        music = "self.music_file"
         password = self.entry_password.get()
+
+        if not self.filename:
+            photo = None
+        else:
+            photo = self.filename
+
+        if not self.music:
+            music = None
+        else:
+            music = self.music_file
 
         
         if not username or not password or not fullname or not email:
@@ -171,8 +221,42 @@ class User:
                 messagebox.showwarning("Warning", "This user already exists")
                 return
         
-        if (self.key == 0):
-            user = {"key": len(data),
+        user = {"key": len(data),
+            "username": username, 
+            "password": password, 
+            "full_name": fullname,
+            "email": email,
+            "photo": photo,
+            "ship": ship,
+            "music": music}
+        
+        # Agregar el nuevo usuario a la lista de datos existentes
+        data.append(user)
+
+        # Escribir los datos actualizados en el archivo JSON
+        with open("data.json", "w") as json_file:
+            json.dump(data, json_file, indent=4)
+            
+
+    def saveChanges(self):
+        username = self.entry_username.get()
+        fullname = self.entry_name.get()
+        email = self.entry_email.get()
+        photo = "self.filename"
+        ship = self.ship_images[self.current_index]
+        music = "self.music_file"
+        password = self.entry_password.get()
+
+        
+        if not username or not password or not fullname or not email:
+            messagebox.showwarning("Warning", "Please fill all the data to create your user")
+            return
+        
+        if self.verify_password(password) == False:
+            messagebox.showwarning("Error", "Password must have:\n- Minimum 7 characters\n- You must use at least one capital letter\n- You must use at least one special symbol\n- You must use at least one number\n- You must use at least one lowercase letter")
+            return
+        
+        user = {"key": self.key,
                 "username": username, 
                 "password": password, 
                 "full_name": fullname,
@@ -180,29 +264,16 @@ class User:
                 "photo": photo,
                 "ship": ship,
                 "music": music}
+        
+        with open("data.json") as json_file:
+            data = json.load(json_file)
             
-            # Agregar el nuevo usuario a la lista de datos existentes
-            data.append(user)
+        for usuario in data:
+            if usuario["key"] == self.key:
+                usuario.update(user) 
 
-            # Escribir los datos actualizados en el archivo JSON
-            with open("data.json", "w") as json_file:
-                json.dump(data, json_file, indent=4)
-        else:
-            user = {"key": self.key,
-                "username": username, 
-                "password": password, 
-                "full_name": fullname,
-                "email": email,
-                "photo": photo,
-                "ship": ship,
-                "music": music}
-            
-            for usuario in data:
-                if usuario["key"] == self.key:
-                    usuario = user 
-
-            with open("data.json", "w") as json_file:
-                json.dump(data, json_file, indent=4)
+        with open("data.json", "w") as json_file:
+            json.dump(data, json_file, indent=4)
         
 
     def verify_password(self, password):
@@ -222,4 +293,4 @@ class User:
 
         return True
 
-User(1)
+User(2)
