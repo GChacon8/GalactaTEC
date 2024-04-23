@@ -13,6 +13,8 @@ class newUser:
         self.key = key
         self.window = window
         self.animated_gif = animated_gif
+        self.filename = None
+        self.music_file = None
 
         self.window.title("GalactaTEC")
         self.window.configure(bg="#120043")
@@ -118,11 +120,11 @@ class newUser:
                 self.photo = usuario["photo"]
                 self.music = usuario["music"]
 
-        self.OgPhoto = tk.Label(self.window, text=self.photo, font=("Fixedsys", 5), bg="#120043", fg="white")
+        """self.OgPhoto = tk.Label(self.window, text=self.photo, font=("Fixedsys", 5), bg="#120043", fg="white")
         self.OgPhoto.place(relx=0.4, rely=0.48, anchor="center")
 
         self.music = tk.Label(self.window, text=self.music, font=("Fixedsys", 5), bg="#120043", fg="white")
-        self.music.place(relx=0.4, rely=0.73, anchor="center")
+        self.music.place(relx=0.4, rely=0.73, anchor="center")"""
 
         # Mostrar la foto de perfil actual
         self.pic = tk.Label(self.window, background="#2b5a81")
@@ -194,11 +196,11 @@ class newUser:
 
     def select_music(self):
         # Abrir un cuadro de diálogo para seleccionar un archivo MP3
-        self.music_file = filedialog.askopenfilename(title="Seleccionar Música", filetypes=(("Archivos MP3", "*.mp3"), ("Todos los archivos", "*.*")))
+        self.music_file = filedialog.askopenfilenames(title="Seleccionar Música", filetypes=(("Archivos MP3", "*.mp3"), ("Todos los archivos", "*.*")))
 
         # Verificar si se seleccionó un archivo
         if self.music_file:
-            print("Archivo de música seleccionado:", self.music_file)
+            print("Archivo/s de música seleccionado:", self.music_file)
 
     def createUser(self):
         username = self.entry_username.get()
