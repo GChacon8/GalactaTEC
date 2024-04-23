@@ -6,16 +6,12 @@ import recover
 import AnimatedGIF
 
 class login:
-    def __init__(self):
-        self.window = tk.Tk()
+    def __init__(self, window, animated_gif):
+        self.window = window
+        self.animated_gif = animated_gif
         self.window.title("GalactaTEC")
         self.window.configure(bg="#120043")
         self.window.geometry("800x600")
-
-        #Configuracion del fondo 
-        gif_path = "Images/space_background.gif"
-        animated_gif = AnimatedGIF.AnimatedGIF(self.window, gif_path)
-        animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.etiqueta = tk.Label(self.window, text="¡GalactaTEC!", font=("Fixedsys", 30, "italic"), bg="#120043", fg="white")
         self.etiqueta.place(relx=0.5, rely=0.1, anchor="center")
@@ -55,8 +51,8 @@ class login:
 
     def goToRecover(self):
         print("entra")
-        self.window.destroy()
-        recover.Recover()
+        self.clear_win()
+        recover.Recover(self.window, self.animated_gif)
 
     def verify(self):
         username = self.entry_username.get()
@@ -74,7 +70,7 @@ class login:
         for usuario in data:
             if usuario["username"] == username and usuario["password"] == password:
                 self.clear_win()
-                menu.init_menu(self.window, usuario["key"])
+                menu.init_menu(self.window, self.animated_gif, usuario["key"])
                 return
 
         # Si no se encuentra el usuario en el archivo JSON o las credenciales son incorrectas
@@ -83,10 +79,11 @@ class login:
     def createUser(self):
         import newUser
         self.clear_win()
-        newUser.newUser(0)  
+        newUser.newUser(self.window, self.animated_gif, 0)  
 
     def clear_win(self):
         for widget in self.window.winfo_children():
-            widget.destroy() 
+            if widget != self.animated_gif:
+                widget.destroy()
 
 

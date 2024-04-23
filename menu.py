@@ -2,17 +2,14 @@ import tkinter as tk
 import AnimatedGIF
 
 class init_menu:
-  def __init__(self, window, key):
+  def __init__(self, window, animated_gif, key):
     self.key = key
     self.window = window
+    self.animated_gif = animated_gif
+
     self.window.title("GalactaTEC")
     self.window.configure(bg="#120043")
     self.window.geometry("800x600")
-    
-    #Configuracion del fondo 
-    gif_path = "Images/space_background.gif"
-    animated_gif = AnimatedGIF.AnimatedGIF(self.window, gif_path)
-    animated_gif.place(x=0, y=0, relwidth=1, relheight=1) 
     
     #Etiquetas y botones del menu principal
     self.etiqueta = tk.Label(self.window, text="¡GalactaTEC!", font=("Fixedsys", 30, "italic"), bg="#120043", fg="white")
@@ -42,11 +39,12 @@ class init_menu:
   def userSettings(self):
      import newUser
      self.clear_win()
-     newUser.newUser(self.window, self.key)
+     newUser.newUser(self.window, self.animated_gif, self.key)
   
   def clear_win(self):
-    for widget in self.window.winfo_children():
-        widget.destroy()
+      for widget in self.window.winfo_children():
+          if widget != self.animated_gif:
+              widget.destroy()
     
   def gotoProfiles(self):
     self.clear_win()

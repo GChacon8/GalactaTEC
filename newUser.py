@@ -9,18 +9,14 @@ import login
 import menu
 
 class newUser:
-    def __init__(self, window, key):
+    def __init__(self, window, animated_gif, key):
         self.key = key
         self.window = window
+        self.animated_gif = animated_gif
 
         self.window.title("GalactaTEC")
         self.window.configure(bg="#120043")
         self.window.geometry("800x600")
-
-        #Configuracion del fondo 
-        gif_path = "Images/space_background.gif"
-        animated_gif = AnimatedGIF.AnimatedGIF(self.window, gif_path)
-        animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.etiqueta = tk.Label(self.window, text="¡GalactaTEC!", font=("Fixedsys", 30, "italic"), bg="#120043", fg="white")
         self.etiqueta.place(relx=0.5, rely=0.1, anchor="center")
@@ -94,14 +90,16 @@ class newUser:
 
     def clear_win(self):
         for widget in self.window.winfo_children():
-            widget.destroy()
+            if widget != self.animated_gif:
+                widget.destroy()
 
     def goBack(self):
-        self.clear_win()
         if self.key == 0:
-            login.login()
+            self.clear_win()
+            login.login(self.window, self.animated_gif)
         else:
-            menu.init_menu(self.window, self.key)
+            self.clear_win()
+            menu.init_menu(self.window, self.animated_gif, self.key)
 
     def setOriginalValues(self):
 

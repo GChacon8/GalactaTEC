@@ -8,16 +8,13 @@ import datetime
 import re
 
 class Recover:
-    def __init__(self):
-        self.window = tk.Tk()
+    def __init__(self, window, animated_gif):
+        self.window = window
+        self.animated_gif = animated_gif
+
         self.window.title("GalactaTEC")
         self.window.configure(bg="#120043")
         self.window.geometry("800x600")
-
-        #Configuracion del fondo 
-        gif_path = "Images/space_background.gif"
-        animated_gif = AnimatedGIF.AnimatedGIF(self.window, gif_path)
-        animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.etiqueta = tk.Label(self.window, text="¡GalactaTEC!", font=("Fixedsys", 30, "italic"), bg="#120043", fg="white")
         self.etiqueta.place(relx=0.5, rely=0.2, anchor="center")
@@ -38,9 +35,9 @@ class Recover:
         self.window.mainloop()
 
     def cancel(self):
-        self.window.destroy()
+        self.clear_win()
         import login
-        login.login()
+        login.login(self.window, self.animated_gif)
 
     def verifyWindow(self):
         self.emailLbl.destroy()
@@ -90,9 +87,9 @@ class Recover:
             json.dump(data, json_file, indent=4)
 
         messagebox.showinfo("Password updated", "Your password has been changed successfully")
-        self.window.destroy()
+        self.clear_win
         import login
-        inst_login = login.login()
+        login.login(self.window, self.animated_gif)
 
     def verifyEmail(self):
         self.email = self.entry_email.get()
@@ -132,8 +129,6 @@ class Recover:
         
     def verify_code(self):
         code = self.entry_code.get()
-        print(code)
-        print(self.codeEntered)
 
         current_time = datetime.datetime.now()
         time_difference = current_time - self.timestamp
@@ -162,3 +157,8 @@ class Recover:
             return False
 
         return True
+    
+    def clear_win(self):
+        for widget in self.window.winfo_children():
+            if widget != self.animated_gif:
+                widget.destroy()
