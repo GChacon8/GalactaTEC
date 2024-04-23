@@ -1,10 +1,12 @@
 import pygame
 import random
+from Observer import Collidable
 
 
 
-class Enemy:
+class Enemy(Collidable):
   def __init__(self,posx,posy):
+    super().__init__()
     self.image = pygame.image.load("Images/enemy.png")
     self.image = pygame.transform.smoothscale(self.image, (40, 40))
     self.rect = self.image.get_rect()
@@ -36,12 +38,7 @@ class Enemy:
   def move_up(self):
      self.rect.y -= 40
 
-
-
-  def kill(self):
-    self.active = False
-  
-  def draw(self, screen):
+  def draw(self, screen: pygame.Surface):
     if self.active:
       screen.blit(self.image, self.rect)
     else:
@@ -56,4 +53,6 @@ class Enemy:
   def isDead(self):
     return self.active
   
+  def on_collision(self, other: Collidable):
+    print("Enemy collided with:", other)
  

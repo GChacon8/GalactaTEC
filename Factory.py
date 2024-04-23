@@ -5,9 +5,10 @@ from Enemy import Enemy
 class EnemyFactory:
 
     @staticmethod
-    def create_enemies(row,col):
+    def create_enemies(row:int,col:int) -> tuple[list[list[Enemy]],list[Enemy]]:
         enemies=[]
         enemies_aux=[]
+        enemies_list:list[Enemy]=[]
 
         startx=0
         starty=-240
@@ -21,11 +22,12 @@ class EnemyFactory:
                 startx+=90
 
             enemies.append(enemies_aux)
+            enemies_list.extend(enemies_aux)
             enemies_aux=[]
             col-=1
             startx=0
             starty+=40
-        return enemies
+        return (enemies,enemies_list)
 
 
 

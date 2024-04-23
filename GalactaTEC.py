@@ -4,9 +4,15 @@ import itertools
 import os
 import random
 import sys
+from typing import Sequence
 
+
+from Bonus import Bonus, BonusType
+from Enemy import Enemy
+from Entity import Entity
 from Factory import EnemyFactory
 from Enemy_movement import EnemyMovement
+from Observer import Collidable, CollisionObserver
 
 
 class galacta:
@@ -38,20 +44,34 @@ class init_menu:
   def gotoProfiles(self):
     self.clear_win()
 
-class Bullet:
+class Bullet (Collidable):
   def __init__(self, ship):
+    super().__init__()
     self.image = pygame.image.load("Images/bullet.png")
     self.image = pygame.transform.smoothscale(self.image, (10, 10))
     self.rect = self.image.get_rect()
     self.rect.center = ship.rect.center
 
-class Ship:
+  def draw(self, screen: pygame.Surface):
+    if self.active:
+      screen.blit(self.image, self.rect)
+
+  def on_collision(self, other: Collidable):
+    print("Bullet collided with:", other)
+
+  def desactive(self):
+    self.active = False
+
+class Ship (Collidable):
   def __init__(self):
+    super().__init__()
     self.image = pygame.image.load("Images/spaceship.png")
     self.image = pygame.transform.smoothscale(self.image, (80, 80))
     self.rect = self.image.get_rect()
     self.rect.center = (200, 500)
     self.speed = 7
+
+    self.active = True
 
   def update(self, keys):
     if keys[pygame.K_LEFT]:
@@ -66,8 +86,15 @@ class Ship:
     self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
     self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
 
-  def draw(self, screen):
-    screen.blit(self.image, self.rect)
+  def draw(self, screen: pygame.Surface):
+    if self.active:
+      screen.blit(self.image, self.rect)
+
+  def on_collision(self, other: Collidable):
+    print("Spaceship collided with:", other)
+
+  def desactive(self):
+    self.active = False
 
 
 class AnimatedBackground(pygame.sprite.Sprite):
@@ -107,7 +134,8 @@ class game:
 
     self.images = [pygame.image.load('background_frames' + os.sep + file_name).convert() for file_name in sorted(os.listdir('background_frames'))]
     self.background = AnimatedBackground(position=(0, 0), images=self.images, delay = 0.03)
-    self.all_sprites = pygame.sprite.Group(self.background)
+    self.all_sprites = pygame.sprite.Group()
+    self.all_sprites.add(self.background)
 
 
 
@@ -116,8 +144,23 @@ class game:
     #self.background.fill((255, 255, 255))  # Blanco
 
     self.inst_ship = Ship()
-    self.inst_enemies = EnemyFactory.create_enemies(0,0)
+    enemies = EnemyFactory.create_enemies(6,6)  
+    # Save the matrix of enemies
+    self.inst_enemies: list[list[Enemy]] = enemies[0]
     self.inst_enemyMovement = EnemyMovement(self.inst_enemies)
+    self.bullets: list[Bullet] = []
+    self.inst_bonuses: list[Bonus] = []
+
+    # Create List Entities
+    self.inst_entities: Sequence[Entity] = [self.inst_ship] + enemies[1]
+
+    # Create the Observer
+    self.collision_observer = CollisionObserver()
+    # Register the Ship and the enemies
+    self.collision_observer.register(self.inst_entities)  
+
+    self.create_bonus()
+
 
     self.setup_counter = 0
     self.t=0
@@ -149,11 +192,6 @@ class game:
       self.all_sprites.draw(self.screen)
        
 
-
-
-      self.inst_ship.draw(self.screen)  # Dibujar la nave en su nueva posición
-
-
       if self.t == 60:
         if self.movement:#elegir acá el patron de movimiento
           self.inst_enemyMovement.pattern_1()
@@ -169,14 +207,26 @@ class game:
       else:
         self.t+=2 #cambiar a +=1
 
-      #Dibujar los enemigos
-      for i in self.inst_enemies:
-        for j in i:
-          j.draw(self.screen)
-              
+      # Draw all entities
+      for entity in self.inst_entities:
+        entity.draw(self.screen)
+
+      # Check for collisions
+      self.collision_observer.update()
+
     # Actualizar la pantalla
       pygame.display.flip()
-      
+
+  def create_bonus(self):
+    self.inst_bonuses = [
+                          Bonus(100, 100, BonusType.EXTRA_LIFE),
+                          Bonus(200, 200, BonusType.SHIELD)
+                        ]
+
+    for bonus in self.inst_bonuses:
+      bonus.set_active(True)
+      self.collision_observer.register(bonus)
+    self.inst_entities.extend(self.inst_bonuses)
 
 if __name__ == "__main__":
   inst_galacta = galacta()
