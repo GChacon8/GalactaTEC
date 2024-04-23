@@ -2,7 +2,8 @@ import tkinter as tk
 import menu
 from tkinter import messagebox
 import json
-import newUser
+import recover
+import AnimatedGIF
 
 class login:
     def __init__(self):
@@ -13,7 +14,7 @@ class login:
 
         #Configuracion del fondo 
         gif_path = "Images/space_background.gif"
-        animated_gif = menu.AnimatedGIF(self.window, gif_path)
+        animated_gif = AnimatedGIF.AnimatedGIF(self.window, gif_path)
         animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.etiqueta = tk.Label(self.window, text="¡GalactaTEC!", font=("Fixedsys", 30, "italic"), bg="#120043", fg="white")
@@ -47,10 +48,15 @@ class login:
         self.recover = tk.Label(self.window, text="Forgot your password?:", font=("Fixedsys", 15), bg="#120043", fg="white")
         self.recover.place(relx=0.4, rely=0.6, anchor="center")
 
-        self.btnRecover = tk.Button(self.window, text="Recover Password", font=("Fixedsys", 10))
+        self.btnRecover = tk.Button(self.window, text="Recover Password", font=("Fixedsys", 10), command=self.goToRecover)
         self.btnRecover.place(relx=0.65, rely=0.6, anchor="center") 
 
         self.window.mainloop()
+
+    def goToRecover(self):
+        print("entra")
+        self.window.destroy()
+        recover.Recover()
 
     def verify(self):
         username = self.entry_username.get()
@@ -67,16 +73,20 @@ class login:
         # Verificar las credenciales con los datos del archivo JSON
         for usuario in data:
             if usuario["username"] == username and usuario["password"] == password:
-                self.window.destroy()
-                inst_init_menu = menu.init_menu()
+                self.clear_win()
+                menu.init_menu(self.window, usuario["key"])
                 return
 
         # Si no se encuentra el usuario en el archivo JSON o las credenciales son incorrectas
         messagebox.showerror("Error", "Wrong credentials. Please try again.")
         
     def createUser(self):
-        inst_newUser = newUser.User(0)
-         
+        import newUser
+        self.clear_win()
+        newUser.newUser(0)  
 
+    def clear_win(self):
+        for widget in self.window.winfo_children():
+            widget.destroy() 
 
 

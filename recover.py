@@ -1,11 +1,10 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
-import menu
+from tkinter import messagebox
+import AnimatedGIF
 import json
 import yagmail
 import random
 import datetime
-import login
 import re
 
 class Recover:
@@ -17,7 +16,7 @@ class Recover:
 
         #Configuracion del fondo 
         gif_path = "Images/space_background.gif"
-        animated_gif = menu.AnimatedGIF(self.window, gif_path)
+        animated_gif = AnimatedGIF.AnimatedGIF(self.window, gif_path)
         animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.etiqueta = tk.Label(self.window, text="¡GalactaTEC!", font=("Fixedsys", 30, "italic"), bg="#120043", fg="white")
@@ -30,13 +29,18 @@ class Recover:
         self.entry_email = tk.Entry(self.window)
         self.entry_email.place(relx=0.55, rely=0.3, anchor="center", width=200)
 
-        self.btnCancel = tk.Button(self.window, text=" Cancel ", font=("Fixedsys", 15), background="#52112f", fg="white")
+        self.btnCancel = tk.Button(self.window, text=" Cancel ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.cancel)
         self.btnCancel.place(relx=0.4, rely=0.4, anchor="center") 
 
         self.btnSend = tk.Button(self.window, text=" Send ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.verifyEmail)
         self.btnSend.place(relx=0.6, rely=0.4, anchor="center") 
 
         self.window.mainloop()
+
+    def cancel(self):
+        self.window.destroy()
+        import login
+        login.login()
 
     def verifyWindow(self):
         self.emailLbl.destroy()
@@ -87,6 +91,7 @@ class Recover:
 
         messagebox.showinfo("Password updated", "Your password has been changed successfully")
         self.window.destroy()
+        import login
         inst_login = login.login()
 
     def verifyEmail(self):
@@ -157,5 +162,3 @@ class Recover:
             return False
 
         return True
-
-Recover()

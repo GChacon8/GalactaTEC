@@ -18,5 +18,15 @@
         "photo": "Images/pp.png",
         "ship": "Images/ships/ship1.png",
         "music": "self.music_file"
+    },
+    {
+        "key": 3,
+        "username": "giank",
+        "password": "Ab1234!",
+        "full_name": "Giancarlo",
+        "email": "valeriamorales40@gmail.com",
+        "photo": "C:/Users/valer/OneDrive/Documentos/GitHub/GalactaTEC/Images/pp2.png",
+        "ship": "Images/ships/ship4.png",
+        "music": "C:/Users/valer/OneDrive/Documentos/GitHub/GalactaTEC/Songs/Black Sabbath - Paranoid.mp3"
     }
 ]

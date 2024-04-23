@@ -1,24 +1,25 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import menu
+import AnimatedGIF
 from PIL import Image, ImageTk
 import json
 import re
 import yagmail
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import login
+import menu
 
-class User:
-    def __init__(self, key):
+class newUser:
+    def __init__(self, window, key):
         self.key = key
-        self.window = tk.Tk()
+        self.window = window
+
         self.window.title("GalactaTEC")
         self.window.configure(bg="#120043")
         self.window.geometry("800x600")
 
         #Configuracion del fondo 
         gif_path = "Images/space_background.gif"
-        animated_gif = menu.AnimatedGIF(self.window, gif_path)
+        animated_gif = AnimatedGIF.AnimatedGIF(self.window, gif_path)
         animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
 
         self.etiqueta = tk.Label(self.window, text="¡GalactaTEC!", font=("Fixedsys", 30, "italic"), bg="#120043", fg="white")
@@ -85,8 +86,22 @@ class User:
             self.btnCreate = tk.Button(self.window, text=" ★ Save Changes ★ ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.saveChanges)
             self.btnCreate.place(relx=0.6, rely=0.8, anchor="center")
 
+        self.btnBack = tk.Button(self.window, text=" Go Back ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.goBack)
+        self.btnBack.place(relx=0.5, rely=0.9, anchor="center") 
+
 
         self.window.mainloop()
+
+    def clear_win(self):
+        for widget in self.window.winfo_children():
+            widget.destroy()
+
+    def goBack(self):
+        self.clear_win()
+        if self.key == 0:
+            login.login()
+        else:
+            menu.init_menu(self.window, self.key)
 
     def setOriginalValues(self):
 
@@ -227,7 +242,7 @@ class User:
                 messagebox.showwarning("Warning", "This user already exists")
                 return
         
-        user = {"key": len(data),
+        user = {"key": len(data)+1,
             "username": username, 
             "password": password, 
             "full_name": fullname,
@@ -326,4 +341,3 @@ class User:
         except Exception as e:
             print("Error al enviar el correo electrónico:", e)
             return False
-        
