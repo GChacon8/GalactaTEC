@@ -6,6 +6,7 @@ import random
 import sys
 
 from Factory import EnemyFactory
+from Enemy_movement import EnemyMovement
 
 
 class galacta:
@@ -87,9 +88,14 @@ class AnimatedBackground(pygame.sprite.Sprite):
             self.image = next(self.images)
 
 
-def load_images(path):
-    images =  [pygame.image.load(path + os.sep + file_name).convert() for file_name in sorted(os.listdir(path))]
+def load_images(path, target_size):
+    images = []
+    for file_name in sorted(os.listdir(path)):
+        image = pygame.image.load(os.path.join(path, file_name)).convert()
+        image = pygame.transform.scale(image, target_size)
+        images.append(image)
     return images
+
 
 
 class game:
@@ -111,9 +117,12 @@ class game:
 
     self.inst_ship = Ship()
     self.inst_enemies = EnemyFactory.create_enemies(6,6)
+    self.inst_enemyMovement = EnemyMovement(self.inst_enemies)
+
     self.setup_counter = 0
     self.t=0
     self.running = True
+    self.movement = False
   
 
   def run(self):
@@ -133,14 +142,10 @@ class game:
 
     # Actualizar la nave según las teclas presionadas
       self.inst_ship.update(keys)
-
-      
-      
       self.all_sprites.update(dt)    
 
     # Dibujar todo
       self.screen.blit(self.background.image, self.background.rect)  # Dibujar fondo
-
       self.all_sprites.draw(self.screen)
        
 
@@ -148,19 +153,23 @@ class game:
 
       self.inst_ship.draw(self.screen)  # Dibujar la nave en su nueva posición
 
-      #"""
-      if self.t==60 and self.setup_counter<6:
-        for i in self.inst_enemies:#cambiar para que se dibujen para todos los enemigos
-          for j in i:
-            j.move_down()
-          #i.move(self.test,100) 
-          #self.test+=5
-          #i.draw(self.screen)
-        self.t=0
-        self.setup_counter+=1
-      self.t+=1
-      #"""
 
+      if self.t == 60:
+        if self.movement:#elegir acá el patron de movimiento
+          self.inst_enemyMovement.pattern_1()
+        if self.setup_counter<6:
+          for i in self.inst_enemies:
+            for j in i:
+              j.move_down()
+        else:
+          self.movement = True
+
+        self.setup_counter+=1
+        self.t=0
+      else:
+        self.t+=2 #cambiar a +=1
+
+      #Dibujar los enemigos
       for i in self.inst_enemies:
         for j in i:
           j.draw(self.screen)
