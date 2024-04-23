@@ -116,7 +116,7 @@ class game:
     #self.background.fill((255, 255, 255))  # Blanco
 
     self.inst_ship = Ship()
-    self.inst_enemies = EnemyFactory.create_enemies(6,6)
+    self.inst_enemies = EnemyFactory.create_enemies(0,0)
     self.inst_enemyMovement = EnemyMovement(self.inst_enemies)
 
     self.setup_counter = 0
