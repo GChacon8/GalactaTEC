@@ -4,6 +4,9 @@ import menu
 from PIL import Image, ImageTk
 import json
 import re
+import yagmail
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 class User:
     def __init__(self, key):
@@ -76,7 +79,7 @@ class User:
 
         else:
             self.setOriginalValues()
-            self.btnCancel = tk.Button(self.window, text=" Cancelar ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.createUser)
+            self.btnCancel = tk.Button(self.window, text=" Cancel ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.createUser)
             self.btnCancel.place(relx=0.35, rely=0.8, anchor="center") 
             
             self.btnCreate = tk.Button(self.window, text=" ★ Save Changes ★ ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.saveChanges)
@@ -90,8 +93,8 @@ class User:
         with open("data.json") as json_file:
             data = json.load(json_file)
 
-        photo = ""
-        music = ""
+        self.photo = ""
+        self.music = ""
             
         for usuario in data:
             if usuario["key"] == self.key:
@@ -99,13 +102,13 @@ class User:
                 self.entry_name.insert(0, usuario["full_name"])
                 self.entry_email.insert(0, usuario["email"])
                 self.entry_password.insert(0,usuario ["password"])
-                photo = usuario["photo"]
-                music = usuario["music"]
+                self.photo = usuario["photo"]
+                self.music = usuario["music"]
 
-        self.OgPhoto = tk.Label(self.window, text=photo, font=("Fixedsys", 5), bg="#120043", fg="white")
+        self.OgPhoto = tk.Label(self.window, text=self.photo, font=("Fixedsys", 5), bg="#120043", fg="white")
         self.OgPhoto.place(relx=0.4, rely=0.48, anchor="center")
 
-        self.music = tk.Label(self.window, text=music, font=("Fixedsys", 5), bg="#120043", fg="white")
+        self.music = tk.Label(self.window, text=self.music, font=("Fixedsys", 5), bg="#120043", fg="white")
         self.music.place(relx=0.4, rely=0.73, anchor="center")
 
         # Mostrar la foto de perfil actual
@@ -116,12 +119,11 @@ class User:
         self.OgPhoto = tk.Label(self.window, text="Me", font=("Fixedsys", 10), bg="#120043", fg="white")
         self.OgPhoto.place(relx=0.25, rely=0.33, anchor="center")
 
-        ppImage = Image.open(photo).resize((70,70))
+        ppImage = Image.open(self.photo).resize((70,70))
         ppPhoto = ImageTk.PhotoImage(ppImage)
 
         self.pic.config(image=ppPhoto)
         self.pic.image = ppPhoto
-
 
     def shipsCarousel(self):
         self.ship_images = [
@@ -207,6 +209,10 @@ class User:
             messagebox.showwarning("Warning", "Please fill all the data to create your user")
             return
         
+        if self.validateEmail(email) == False:
+            messagebox.showwarning("Error", "The email address entered is not valid, please try again")
+            return
+        
         if self.verify_password(password) == False:
             messagebox.showwarning("Error", "Password must have:\n- Minimum 7 characters\n- You must use at least one capital letter\n- You must use at least one special symbol\n- You must use at least one number\n- You must use at least one lowercase letter")
             return
@@ -242,14 +248,26 @@ class User:
         username = self.entry_username.get()
         fullname = self.entry_name.get()
         email = self.entry_email.get()
-        photo = "self.filename"
         ship = self.ship_images[self.current_index]
-        music = "self.music_file"
         password = self.entry_password.get()
+        
+        if not self.filename:
+            photo = self.photo #Si no ingresa un nuevo valor permanece el original
+        else:
+            photo = self.filename
+
+        if not self.music:
+            music = self.music
+        else:
+            music = self.music_file
 
         
         if not username or not password or not fullname or not email:
             messagebox.showwarning("Warning", "Please fill all the data to create your user")
+            return
+        
+        if self.validateEmail(email) == False:
+            messagebox.showwarning("Error", "The email address entered is not valid, please try again")
             return
         
         if self.verify_password(password) == False:
@@ -292,5 +310,21 @@ class User:
             return False
 
         return True
+    
+    
+    def validateEmail(self, destination):
+        try:
+            # Inicializar Yagmail con tu dirección de correo electrónico y contraseña
+            yag = yagmail.SMTP('galactatec@gmail.com', 'twklqtltylscbvnz')
 
-User(2)
+            # Enviar el correo electrónico
+            yag.send(to=destination, subject='Welcome to GalactaTEC', contents='This email is a confirmation of your new user for GalactaTEC.')
+
+            print("El correo electrónico fue enviado exitosamente.")
+            return True
+
+        except Exception as e:
+            print("Error al enviar el correo electrónico:", e)
+            return False
+        
+User(2).validateEmail('valemorales07@estudiantec.cr')
