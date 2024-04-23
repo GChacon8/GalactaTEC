@@ -327,4 +327,3 @@ class User:
             print("Error al enviar el correo electrónico:", e)
             return False
         
-User(2).validateEmail('valemorales07@estudiantec.cr')
