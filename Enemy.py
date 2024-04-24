@@ -54,5 +54,6 @@ class Enemy(Collidable):
     return self.active
   
   def on_collision(self, other: Collidable):
-    print("Enemy collided with:", other)
+    # print("Enemy collided with:", other)
+    pass
  

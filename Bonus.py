@@ -13,6 +13,9 @@ class BonusType(enum.Enum):
 
 
 class Bonus(Collidable):
+
+    WIDTH = 40
+
     def __init__(self, posx: int, posy: int, bonus_type: BonusType):
         super().__init__()
         self.image = pygame.image.load( "Images/" + 
@@ -26,9 +29,19 @@ class Bonus(Collidable):
         self.rect.x = posx
         self.rect.y = posy
         self.type = bonus_type
+        self.active = True
 
-    def on_collision(self, other: Collidable):
-        print(f"Bonus collected: {self.type.value}")
+    def update(self):
+        # Mover el bonus hacia abajo en la pantalla
+        self.rect.y += 5
+        if self.rect.y > 600:  # Suponiendo que el límite inferior es 600
+            self.active = False
+
+    def on_collision(self, other):
+        if isinstance(other, Ship):
+            print(f"Bonus {self.type.value} collected!")
+            self.active = False
+            # Aquí se podrían implementar efectos adicionales
     
     def draw(self, screen: pygame.Surface):
         if self.active:
