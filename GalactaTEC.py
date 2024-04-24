@@ -3,7 +3,8 @@ import tkinter as tk
 import itertools
 import os
 import random
-import sys
+import menu
+import login
 
 from Factory import EnemyFactory
 from Enemy_movement import EnemyMovement
@@ -14,29 +15,6 @@ class galacta:
     #inst_init_menu = init_menu()
     inst_game = game()
     inst_game.run()
-
-
-class init_menu:
-  def __init__(self):
-    self.window = tk.Tk()
-    self.window.title("GalactaTEC")
-    self.window.configure(bg="#120043")
-    self.etiqueta = tk.Label(self.window, text="¡GalactaTEC!", font=("Courier", 16, "italic"))
-    self.etiqueta.pack(padx=20, pady=30)
-    self.btnSinglePlayer = tk.Button(self.window, text="Single Player", font=("Courier", 12, "italic"))
-    self.btnSinglePlayer.pack(pady=10)
-    self.btnMultiPlayer = tk.Button(self.window, text="Multiplayer", font=("Courier", 12, "italic"))
-    self.btnMultiPlayer.pack(pady=10)
-    self.btnNewProfile = tk.Button(self.window, text="Profiles", font=("Courier", 12, "italic"), command= self.clear_win)
-    self.btnNewProfile.pack(pady=10)
-    self.window.mainloop()
-  
-  def clear_win(self):
-    for widget in self.window.winfo_children():
-        widget.destroy()
-    
-  def gotoProfiles(self):
-    self.clear_win()
 
 class Bullet:
   def __init__(self, ship):
