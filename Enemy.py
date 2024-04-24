@@ -50,9 +50,6 @@ class Enemy(Collidable):
   def get_y_coords(self):
     return self.rect.y
   
-  def isDead(self):
-    return self.active
-  
   def on_collision(self, other: Collidable):
     # print("Enemy collided with:", other)
     pass

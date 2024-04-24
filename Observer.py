@@ -1,7 +1,38 @@
 from abc import ABC, abstractmethod
 from typing import Sequence
 import pygame
-from Entity import Entity
+
+class Entity(ABC,pygame.sprite.Sprite):
+  def __init__(self):
+    super().__init__()
+    self.image: pygame.Surface = pygame.Surface((0, 0))
+    self.rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
+    self.active: bool = False
+    self.isAlive: bool = True
+
+  @abstractmethod
+  def draw(self, screen: pygame.Surface):
+      pass  
+
+  def desactive(self):
+    self.active = False
+
+  def get_active(self) -> bool:
+    return self.active
+  
+  def set_active(self, active: bool):
+    self.active = active
+  
+  def get_isAlive(self) -> bool:
+    return self.isAlive
+  
+  def set_isAlive(self, isAlive: bool):
+    self.isAlive = isAlive
+
+  def kill(self):
+    super().kill()
+    self.active = False
+    self.isAlive = False
 
 class Collidable(Entity,ABC):
 
@@ -56,4 +87,10 @@ class CollisionObserver:
                    ):
                         collidable1.on_collision(collidable2)
                         collidable2.on_collision(collidable1)
+                        if collidable1.get_isAlive() == False:
+                            self.collidables.remove(collidable1)
+                            # print(collidable1.__class__.__name__)
 
+                        if collidable2.get_isAlive() == False:
+                            self.collidables.remove(collidable2)
+                            # print(collidable2.__class__.__name__)
