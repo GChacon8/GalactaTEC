@@ -262,6 +262,15 @@ class game:
 
     def draw_colleted_bonuses(self):
         active_bonuses = self.inst_ship.bonus_colleted
+        # Cargar una fuente personalizada
+        font_path = "fonts/GenericTechno.otf"  # Ruta a la fuente espacial
+        font_size = 12
+        font = pygame.font.Font(font_path, font_size)
+
+        bonus_text = "Empty"
+        
+        # Color de texto azul claro
+        text_color = (0, 255, 255)  # Azul cian
         if active_bonuses:
 
 
@@ -284,14 +293,6 @@ class game:
           image = pygame.transform.scale(original_image, 
                                                 (new_width, new_height))
 
-
-          # Cargar una fuente personalizada
-          font_path = "fonts/GenericTechno.otf"  # Ruta a la fuente espacial
-          font_size = 12
-          font = pygame.font.Font(font_path, font_size)
-          
-          # Color de texto azul claro
-          text_color = (0, 255, 255)  # Azul cian
           
           # Obtener el texto del bonus
           bonus_text = str(bonus.type.value)
@@ -299,14 +300,20 @@ class game:
           # Dibujar el texto del bonus con saltos de línea si es necesario
           try:
               game.draw_text_multiline(self.screen, bonus_text, 
-                              game.SCREEN_WIDTH - 2*Bonus.WIDTH,
-                              game.SCREEN_HEIGHT - Bonus.WIDTH,
+                              game.SCREEN_WIDTH - 2*Bonus.WIDTH -5,
+                              game.SCREEN_HEIGHT - Bonus.WIDTH -5,
                         game.SCREEN_WIDTH, font, text_color)
           except ValueError as e:
               print(str(e))
           
 
           self.screen.blit(image, bonus.rect)
+        else:
+           game.draw_text_multiline(self.screen, bonus_text, 
+                              game.SCREEN_WIDTH - 2*Bonus.WIDTH,
+                              game.SCREEN_HEIGHT - Bonus.WIDTH,
+                        game.SCREEN_WIDTH, font, text_color)
+
 
     def draw_and_update_all_entities(self, keys):
       for entity in self.inst_entities:
