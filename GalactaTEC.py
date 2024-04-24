@@ -6,9 +6,8 @@ import login
 
 class galacta:
   def __init__(self):
-    inst_init_login = login.login()
-    #inst_init_menu = menu.init_menu()
-    #inst_game = game()
+    inst_game = game()
+    inst_game.run()
 
 class Bullet:
   def __init__(self, ship):
