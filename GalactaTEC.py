@@ -251,58 +251,52 @@ class game:
 
 
     def draw_colleted_bonuses(self):
-        active_bonuses = self.inst_ship.bonus_colleted
-        # Cargar una fuente personalizada
-        font_path = "fonts/GenericTechno.otf"  # Ruta a la fuente espacial
-        font_size = 12
-        font = pygame.font.Font(font_path, font_size)
-
-        bonus_text = "Empty"
-        
-        # Color de texto azul claro
-        text_color = (0, 255, 255)  # Azul cian
-        if active_bonuses:
-
-
-          bonus = active_bonuses[0]
-          original_image = bonus.image
-
-          # Obtener las dimensiones originales de la imagen
-          original_width = original_image.get_width()
-          original_height = original_image.get_height()
-          s = 0.5
-          # Calcular las nuevas dimensiones al 25% del tamaño original
-          new_width = int(original_width * s)
-          new_height = int(original_height * s)
-
-          bonus.rect.x = game.SCREEN_WIDTH - new_width
-          bonus.rect.y = game.SCREEN_HEIGHT  - new_height
-
-
-          # Escalar la imagen al 25%
-          image = pygame.transform.scale(original_image, 
-                                                (new_width, new_height))
-
-          
-          # Obtener el texto del bonus
-          bonus_text = str(bonus.type.value)
-          
-          # Dibujar el texto del bonus con saltos de línea si es necesario
-          try:
-              game.draw_text_multiline(self.screen, bonus_text, 
-                              game.SCREEN_WIDTH - 2*Bonus.WIDTH -5,
-                              game.SCREEN_HEIGHT - Bonus.WIDTH -5,
-                        game.SCREEN_WIDTH, font, text_color)
-          except ValueError as e:
-              print(str(e))
-          
-
-          self.screen.blit(image, bonus.rect)
-        else:
-           game.draw_text_multiline(self.screen, bonus_text, 
-                              game.SCREEN_WIDTH - 2*Bonus.WIDTH,
-                              game.SCREEN_HEIGHT - Bonus.WIDTH,
-                        game.SCREEN_WIDTH, font, text_color)
+      active_bonuses = self.inst_ship.bonus_colleted
+      font_path = "fonts/GenericTechno.otf"
+      font_size = 12
+      font = pygame.font.Font(font_path, font_size)
+      text_color = (0, 255, 255)  # Azul cian
+      
+      if active_bonuses:
+          for i, bonus in enumerate(active_bonuses):
+              original_image = bonus.image
+              original_width = original_image.get_width()
+              original_height = original_image.get_height()
+              s = 0.5
+              new_width = int(original_width * s)
+              new_height = int(original_height * s)
+              
+              # Calcular la posición del bonus en el menú
+              bonus_x = game.SCREEN_WIDTH - (len(active_bonuses) - i) * (new_width + 10)
+              bonus_y = game.SCREEN_HEIGHT - new_height
+              
+              # Escalar la imagen al 50%
+              image = pygame.transform.scale(original_image, (new_width, new_height))
+              
+              # Resaltar el primer bonus de la lista
+              if i == 0:
+                  # Dibujar un rectángulo blanco alrededor del primer bonus
+                  pygame.draw.rect(self.screen, (255, 255, 255), 
+                                    (bonus_x - 2, bonus_y - 2,
+                                      new_width + 4, new_height + 4), 2)
+              
+              # Dibujar el bonus en el menú
+              self.screen.blit(image, (bonus_x, bonus_y))
+              
+              # Obtener el texto del bonus
+              bonus_text = str(bonus.type.value)
+              
+              # Dibujar el texto del bonus debajo de la imagen
+              text_surface = font.render(bonus_text, True, text_color)
+              text_x = bonus_x + (new_width - text_surface.get_width()) // 2
+              text_y = bonus_y + new_height + 5
+              self.screen.blit(text_surface, (text_x, text_y))
+      else:
+          bonus_text = "Empty"
+          game.draw_text_multiline(self.screen, bonus_text,
+                                    game.SCREEN_WIDTH - 2*Bonus.WIDTH, 
+                                    game.SCREEN_HEIGHT - Bonus.WIDTH,
+                                      game.SCREEN_WIDTH, font, text_color)
            
     def draw_menu_game(self):
       pygame.draw.rect( self.screen, 
@@ -314,7 +308,7 @@ class game:
                         )
                       )
       self.draw_colleted_bonuses()
-      
+
 
 
     def draw_and_update_all_entities(self, keys):
