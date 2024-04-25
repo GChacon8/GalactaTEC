@@ -78,6 +78,8 @@ class Ship (Collidable):
 
     self.bonus_colleted = []
 
+    self.bonus_sound = pygame.mixer.Sound("sounds/bonus.wav")
+
   def update(self, keys):
     if keys[pygame.K_LEFT]:
       self.rect.x -= self.speed
@@ -99,6 +101,7 @@ class Ship (Collidable):
     # print("Spaceship collided with:", other)
     if isinstance(other, Bonus):
       self.bonus_colleted.append(other)
+      self.bonus_sound.play()
     pass
 
   def bonus_colleted(self):
