@@ -233,7 +233,14 @@ class game:
             self.check_killed()
 
     def generate_bonus(self):
-        if self.available_bonus_types and random.random() < game.BONUS_PROBABILITY:  # 50% chance
+        if random.random() < game.BONUS_PROBABILITY:  # 50% chance
+            if len(self.available_bonus_types) == 0:
+               bonuses = self.inst_ship.bonus_colleted
+               for t in list(BonusType):
+                   if all(bonus.type!=t for bonus in bonuses):
+                       self.available_bonus_types.append(t)
+            if len(self.available_bonus_types) == 0:
+                return
             bonus_type = random.choice(self.available_bonus_types)
             self.available_bonus_types.remove(bonus_type)  # Remove to avoid repetition
             x_position = random.randint(0, self.width - Bonus.WIDTH)  # Assume bonus width is 40
