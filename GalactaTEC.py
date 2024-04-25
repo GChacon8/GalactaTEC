@@ -58,6 +58,9 @@ class Ship (Collidable):
 
     self.bonus_sound = pygame.mixer.Sound("sounds/bonus.wav")
 
+    self.life = 5
+    self.points = 0
+
   def update(self, keys):
     if keys[pygame.K_LEFT]:
       self.rect.x -= self.speed
@@ -123,11 +126,12 @@ class game:
     FRAME_RATE = 60
     BONUS_TIME = 3000
     BONUS_PROBABILITY = 0.5
+    PADDING_MENU = 50
 
     def __init__(self):
         pygame.init()
-        self.width = game.SCREEN_WIDTH if 800==game.SCREEN_WIDTH else game.SCREEN_WIDTH
-        self.height = game.SCREEN_HEIGHT if 600==game.SCREEN_HEIGHT else game.SCREEN_HEIGHT
+        self.width = game.SCREEN_WIDTH
+        self.height = game.SCREEN_HEIGHT
         self.screen = pygame.display.set_mode((self.width, self.height))
 
         self.images = [pygame.image.load('background_frames' + os.sep + file_name).convert() for file_name in sorted(os.listdir('background_frames'))]
@@ -299,6 +303,18 @@ class game:
                               game.SCREEN_WIDTH - 2*Bonus.WIDTH,
                               game.SCREEN_HEIGHT - Bonus.WIDTH,
                         game.SCREEN_WIDTH, font, text_color)
+           
+    def draw_menu_game(self):
+      pygame.draw.rect( self.screen, 
+                        (128, 128, 128),
+                        (0,
+                        game.SCREEN_HEIGHT - game.PADDING_MENU, 
+                        self.SCREEN_WIDTH, 
+                        game.PADDING_MENU
+                        )
+                      )
+      self.draw_colleted_bonuses()
+      
 
 
     def draw_and_update_all_entities(self, keys):
@@ -308,9 +324,7 @@ class game:
         elif isinstance(entity, Bonus):
           entity.update()
         entity.draw(self.screen)
-        pygame.draw.line(self.screen, (255,255,255), (0, self.SCREEN_HEIGHT-50), (self.SCREEN_WIDTH, self.SCREEN_HEIGHT-50), 5)  # Coordenadas de inicio, fin, y grosor
-
-      self.draw_colleted_bonuses()
+      self.draw_menu_game()
 
     def check_killed(self):
        for entity in self.inst_entities:
@@ -385,7 +399,7 @@ class Bonus(Collidable):
     def update(self):
         # Mover el bonus hacia abajo en la pantalla
         self.rect.y += 5
-        if self.rect.y > game.SCREEN_HEIGHT-50:  # Suponiendo que el límite inferior es 600
+        if self.rect.y > game.SCREEN_HEIGHT-game.PADDING_MENU:  # Suponiendo que el límite inferior es 600
             self.kill()
 
 
