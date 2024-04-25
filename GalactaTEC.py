@@ -19,13 +19,21 @@ class galacta:
     inst_game = game()
     inst_game.run()
 
-class Bullet (Collidable):
+
+class BulletShipType(enum.Enum):
+  CHASING_BULLET = "Chasing Bullet"
+  EXPANDING_BULLET = "Expanding Bullet"
+  DOUBLE_POINTS = "Double Points"
+  SHIELD = "Shield"
+  EXTRA_LIFE = "Extra Life"
+
+class BulletShip (Collidable):
   WIDTH = 10
 
   def __init__(self, ship):
     super().__init__()
     self.image = pygame.image.load("Images/bullet.png")
-    self.image = pygame.transform.smoothscale(self.image, (Bullet.WIDTH, Bullet.WIDTH))
+    self.image = pygame.transform.smoothscale(self.image, (BulletShip.WIDTH, BulletShip.WIDTH))
     self.rect = self.image.get_rect()
     self.rect.center = ship.rect.center
 
@@ -59,10 +67,11 @@ class Ship (Collidable):
 
     self.bonus_sound = pygame.mixer.Sound("sounds/bonus.wav")
     self.hit_sound = pygame.mixer.Sound("sounds/hit.wav") 
-    self.hit_sound.set_volume(0.5)
+    self.hit_sound.set_volume(0.25)
 
     self.life = 5
     self.points = 0
+    self.points_multiplier = 1
 
     self.invulnerable_time = 0
 
@@ -102,6 +111,14 @@ class Ship (Collidable):
             self.life -= 1
             self.hit_sound.play()
             self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
+  def get_life(self):
+    return self.life
+  def add_life(self, life=1):
+    self.life += life
+  def get_points(self):
+    return self.points
+  def add_points(self, points=200):
+    self.points += points * self.points_multiplier
 
   def bonus_colleted(self):
     return self.bonus_colleted
@@ -163,8 +180,10 @@ class game:
       enemies = EnemyFactory.create_enemies(6, 6)
       self.inst_enemies = enemies[0]
       self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+      
+      
       self.bullets = []
-      self.available_bonus_types = list(BonusType)  # Lista de tipos de bonos disponibles
+      self.available_bonus_types = [BonusType.EXTRA_LIFE]#list(BonusType)  # Lista de tipos de bonos disponibles
       self.bonus_timer = 0
       self.bonus_interval = game.BONUS_TIME  # 30 segundos
 
@@ -172,6 +191,7 @@ class game:
       self.inst_entities.append(self.inst_ship)
       self.inst_entities.extend(enemies[1])
 
+      # Observer
       self.collision_observer = CollisionObserver()
       self.collision_observer.register(self.inst_entities)
 
@@ -179,6 +199,23 @@ class game:
       self.t = 0
       self.running = True
       self.movement = False
+
+      # Sounds
+      self.sound_bonus_extra_life = pygame.mixer.Sound("sounds/extra_life.wav")
+      self.sound_bonus_extra_life.set_volume(0.05)
+
+      self.sound_bonus_double_points = pygame.mixer.Sound("sounds/double_points.wav")
+      self.sound_bonus_double_points.set_volume(0.05)
+
+      self.sound_bonus_chasing_bullet = pygame.mixer.Sound("sounds/chasing_bullet.wav")
+      self.sound_bonus_chasing_bullet.set_volume(0.05)
+
+      self.sound_bonus_expanding_bullet = pygame.mixer.Sound("sounds/expanding_bullet.wav")
+      self.sound_bonus_expanding_bullet.set_volume(0.05)
+
+      self.sound_bonus_shield = pygame.mixer.Sound("sounds/shield.wav")
+      self.sound_bonus_shield.set_volume(0.05)
+      
 
   def run(self):
       clock = pygame.time.Clock()
@@ -253,20 +290,17 @@ class game:
       active_bonuses = self.inst_ship.bonus_colleted
       if active_bonuses:
           active_bonuses.append(active_bonuses.pop(0))
-          print(f"Changed bonus to: {active_bonuses[-1].type.value}"
-                f" ({active_bonuses[0].type})")
-      else:
-          print("Empty bonuses list")
 
   def use_bonus(self):
       active_bonuses = self.inst_ship.bonus_colleted
       if active_bonuses:
-          selected_bonus = active_bonuses.pop(0)
-          print(f"Using bonus: {selected_bonus.type.value}")
-          # Implementar efectos del bonus aquí
-      else:
-          print("No bonuses available")
-
+          selected_bonus = active_bonuses[0]
+          if selected_bonus.type == BonusType.EXTRA_LIFE:
+              self.inst_ship.add_life()
+              self.sound_bonus_extra_life.play()
+              active_bonuses.pop(0)
+          else:
+             active_bonuses.pop(0)
 
   def draw_colleted_bonuses(self,font,text_color = (0, 255, 255) ):
     active_bonuses = self.inst_ship.bonus_colleted
@@ -325,7 +359,6 @@ class game:
     self.screen.blit(text_surface, (text_x, text_y))
     self.screen.blit(ship_image, (ship_x, ship_y))
 
-  
   def draw_level(self, font, text_color):
     level_text = f"Level: {0}"
     text_surface = font.render(level_text, True, text_color)
@@ -386,7 +419,6 @@ class game:
             self.inst_enemies.remove(entity)
           elif isinstance(entity, Ship):
             self.quit()
-
 
   def draw_text_multiline(surface, text, x_0, y_0, max_x, font, color):
     words = text.split()
