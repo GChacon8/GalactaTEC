@@ -57,6 +57,8 @@ class Ship (Collidable):
     self.bonus_colleted = []
 
     self.bonus_sound = pygame.mixer.Sound("sounds/bonus.wav")
+    self.hit_sound = pygame.mixer.Sound("sounds/hit.wav") 
+    self.hit_sound.set_volume(0.5)
 
     self.life = 5
     self.points = 0
@@ -83,7 +85,10 @@ class Ship (Collidable):
     if isinstance(other, Bonus):
       self.bonus_colleted.append(other)
       self.bonus_sound.play()
-    pass
+    elif isinstance(other, Enemy):
+      self.life -= 1
+      self.hit_sound.play()
+
 
   def bonus_colleted(self):
     return self.bonus_colleted
@@ -296,20 +301,79 @@ class game:
           game.draw_text_multiline(self.screen, bonus_text,
                                     game.SCREEN_WIDTH - 2*Bonus.WIDTH, 
                                     game.SCREEN_HEIGHT - Bonus.WIDTH,
-                                      game.SCREEN_WIDTH, font, text_color)
+                                    game.SCREEN_WIDTH, font, text_color)
+
+    def draw_lives(self):
+      font_path = "fonts/GenericTechno.otf"
+      font_size = 16
+      font = pygame.font.Font(font_path, font_size)
+      text_color = (255, 255, 255)  # Blanco
+
+      lives_text = f"{self.inst_ship.life} x "
+      text_surface = font.render(lives_text, True, text_color)
+      text_x = 10
+      text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
+
+      ship_image = pygame.transform.scale(self.inst_ship.image, (20, 20))
+      ship_x = text_x + text_surface.get_width() + 5
+      ship_y = text_y
+
+      self.screen.blit(text_surface, (text_x, text_y))
+      self.screen.blit(ship_image, (ship_x, ship_y))
+
+    def draw_time(self):
+      font_path = "fonts/GenericTechno.otf"
+      font_size = 16
+      font = pygame.font.Font(font_path, font_size)
+      text_color = (255, 255, 255)  # Blanco
+
+      time_text = f"Time: {pygame.time.get_ticks() // 1000}"
+      text_surface = font.render(time_text, True, text_color)
+      text_x = 150
+      text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
+
+      self.screen.blit(text_surface, (text_x, text_y))
+
+    def draw_level(self):
+      font_path = "fonts/GenericTechno.otf"
+      font_size = 16
+      font = pygame.font.Font(font_path, font_size)
+      text_color = (255, 255, 255)  # Blanco
+
+      level_text = f"Level: {0}"
+      text_surface = font.render(level_text, True, text_color)
+      text_x = game.SCREEN_WIDTH // 2 - text_surface.get_width() // 2
+      text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
+
+      self.screen.blit(text_surface, (text_x, text_y))
+
+    def draw_points(self):
+      font_path = "fonts/GenericTechno.otf"
+      font_size = 16
+      font = pygame.font.Font(font_path, font_size)
+      text_color = (255, 255, 255)  # Blanco
+
+      points_text = f"Points: {self.inst_ship.points}"
+      text_surface = font.render(points_text, True, text_color)
+      text_x = game.SCREEN_WIDTH - text_surface.get_width() - 10
+      text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
+
+      self.screen.blit(text_surface, (text_x, text_y))
            
     def draw_menu_game(self):
-      pygame.draw.rect( self.screen, 
-                        (128, 128, 128),
-                        (0,
+      pygame.draw.rect(self.screen, 
+                      (128, 128, 128),
+                      (0,
                         game.SCREEN_HEIGHT - game.PADDING_MENU, 
                         self.SCREEN_WIDTH, 
                         game.PADDING_MENU
-                        )
+                      )
                       )
       self.draw_colleted_bonuses()
-
-
+      self.draw_lives()
+      self.draw_time()
+      self.draw_level()
+      self.draw_points()
 
     def draw_and_update_all_entities(self, keys):
       for entity in self.inst_entities:
