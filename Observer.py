@@ -53,7 +53,9 @@ class CollisionRules:
             "Ship": ["Bonus", "Enemy"],
             "Enemy": ["Ship", "BulletShip"],
             "BulletShip": ["Enemy", "Ship"],
-            "Bonus": ["Ship"]
+            "Bonus": ["Ship"],
+            "Shield": [""],
+            
         }
 
     def can_collide(self, obj1: Collidable, obj2: Collidable):

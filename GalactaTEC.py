@@ -183,7 +183,7 @@ class game:
       
       
       self.bullets = []
-      self.available_bonus_types = [BonusType.EXTRA_LIFE]#list(BonusType)  # Lista de tipos de bonos disponibles
+      self.available_bonus_types = [BonusType.SHIELD]#list(BonusType)  # Lista de tipos de bonos disponibles
       self.bonus_timer = 0
       self.bonus_interval = game.BONUS_TIME  # 30 segundos
 
@@ -299,9 +299,14 @@ class game:
               self.inst_ship.add_life()
               self.sound_bonus_extra_life.play()
               active_bonuses.pop(0)
+          elif selected_bonus.type == BonusType.SHIELD:
+              self.shield = Shield(self.inst_ship.rect.centerx, self.inst_ship.rect.centery)
+              self.inst_entities.append(self.shield)  # Add shield to entities
+              self.collision_observer.register([self.shield]) # Add shield to collision observer
+              self.sound_bonus_shield.play()
+              active_bonuses.pop(0)
           else:
-             active_bonuses.pop(0)
-
+              active_bonuses.pop(0)
   def draw_colleted_bonuses(self,font,text_color = (0, 255, 255) ):
     active_bonuses = self.inst_ship.bonus_colleted
     if active_bonuses:
@@ -408,6 +413,8 @@ class game:
         entity.update(keys)
       elif isinstance(entity, Bonus):
         entity.update()
+      elif isinstance(entity, Shield):
+            entity.update(self.inst_ship.rect.centerx, self.inst_ship.rect.centery)
       entity.draw(self.screen)
     self.draw_menu_game()
 
@@ -498,6 +505,36 @@ class Bonus(Collidable):
   def desactive(self):
         self.active = False
 
+
+### SHIELD
+class Shield(Collidable):
+    PIXELS_FRONT_OF_SHIP = 40
+    def __init__(self, x, y, level=3):
+        super().__init__()
+        self.image = pygame.image.load("Images/shield.png")  # Asegúrate de tener la imagen del escudo en la carpeta Images
+        self.image = pygame.transform.scale(self.image, 
+                                            (Ship.WIDTH, int(0.25 * Ship.WIDTH)))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y - Shield.PIXELS_FRONT_OF_SHIP)  # Ajusta la posición vertical del escudo según sea necesario
+        self.level = level
+        self.font = pygame.font.Font("fonts/GenericTechno.otf", 14) 
+
+    def update(self, x, y):
+        self.rect.center = (x, y - Shield.PIXELS_FRONT_OF_SHIP)  # Actualiza la posición del escudo según la posición de la nave
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+        level_text = str(self.level)
+        text_surface = self.font.render(level_text, True, (0,0,0))  # Color del texto en blanco
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        screen.blit(text_surface, text_rect)
+
+    def on_collision(self, other):
+        if isinstance(other, Enemy):
+            self.level -= 1
+            if self.level <= 0:
+                self.kill()
+                
 if __name__ == "__main__":
   inst_galacta = galacta()
 
