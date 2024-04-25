@@ -7,12 +7,12 @@ class EnemyMovement:
 
 
     def pattern_1(self):
-        print(self.inst_enemies[0][0].get_x_coords())
+        # print(self.inst_enemies[0][0].get_x_coords())
         for i in self.inst_enemies:
             for j in i:
                 #print(self.inst_enemies)
                 reference_enemy = self.inst_enemies[5][0].get_x_coords()   
-                print(reference_enemy)         
+                # print(referenkce_enemy)         
                 if self.moving_rigth:
                     if reference_enemy<=485: #cambiar coords para cumplir con ancho de pantalla
                         j.move_rigth()
