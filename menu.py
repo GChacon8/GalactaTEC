@@ -3,7 +3,7 @@ import AnimatedGIF
 
 class init_menu:
   def __init__(self, window, animated_gif, key):
-    self.key = key
+    self.key = key #llave para el jugador 1 (jugador principal)
     self.window = window
     self.animated_gif = animated_gif
 
@@ -24,7 +24,7 @@ class init_menu:
     self.btnHallofFame = tk.Button(self.window, text="Hall of Fame", font=("Fixedsys", 15), command=self.hallofFame)
     self.btnHallofFame.place(relx=0.5, rely=0.5, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
 
-    self.btnInitP2 = tk.Button(self.window, text="Start Player 2", font=("Fixedsys", 15), command=self.clear_win)
+    self.btnInitP2 = tk.Button(self.window, text="Start Player 2", font=("Fixedsys", 15), command=self.initPlayer2)
     self.btnInitP2.place(relx=0.5, rely=0.6, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
 
     self.btnStartGame = tk.Button(self.window, text="Start Game", font=("Fixedsys", 15), command=self.clear_win)
@@ -34,6 +34,17 @@ class init_menu:
     self.btnExit.place(relx=0.5, rely=0.8, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
 
     self.window.mainloop()
+
+  def initPlayer2(self):
+     self.clear_win()
+     import login
+     login2 = login.login(self.window, self.animated_gif) #llamar a login para el jugador 2
+     login2.key = self.key #mantener la llave del jugador principal
+     login2.player = "player2"
+     login2.showLogin()
+
+     
+
   
 
   def userSettings(self):

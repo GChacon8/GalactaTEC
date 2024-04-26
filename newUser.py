@@ -98,7 +98,8 @@ class newUser:
     def goBack(self):
         if self.key == 0:
             self.clear_win()
-            login.login(self.window, self.animated_gif)
+            win = login.login(self.window, self.animated_gif)
+            win.showLogin()
         else:
             self.clear_win()
             menu.init_menu(self.window, self.animated_gif, self.key)
