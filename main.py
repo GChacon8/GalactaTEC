@@ -14,6 +14,12 @@ class main:
         gif_path = "Images/space_background.gif"
         self.animated_gif = AnimatedGIF.AnimatedGIF(self.window, gif_path)
         self.animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
+<<<<<<< Updated upstream
         login.login(self.window, self.animated_gif)
 
+=======
+        win = login.login(self.window, self.animated_gif)
+        win.showLogin()
+        
+>>>>>>> Stashed changes
 main()
