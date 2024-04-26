@@ -18,7 +18,7 @@ class init_menu:
     self.btnUserSettings = tk.Button(self.window, text="User Settings", font=("Fixedsys", 15), command=self.userSettings)
     self.btnUserSettings.place(relx=0.5, rely=0.3, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 40% desde la parte superior
   
-    self.btnGameSettings = tk.Button(self.window, text="Game Settings", font=("Fixedsys", 15), command=self.clear_win)
+    self.btnGameSettings = tk.Button(self.window, text="Game Settings", font=("Fixedsys", 15), command=self.gameSettings)
     self.btnGameSettings.place(relx=0.5, rely=0.4, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 50% desde la parte superior
 
     self.btnHallofFame = tk.Button(self.window, text="Hall of Fame", font=("Fixedsys", 15), command=self.hallofFame)
@@ -56,6 +56,11 @@ class init_menu:
      import hallofFame
      self.clear_win()
      hallofFame.hallofFame(self.window, self.animated_gif, self.key)
+
+  def gameSettings(self):
+     import gameConfiguration
+     self.clear_win()
+     gameConfiguration.gameConfiguration(self.window, self.animated_gif, self.key)
   
   def clear_win(self):
       for widget in self.window.winfo_children():
