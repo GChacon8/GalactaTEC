@@ -106,6 +106,8 @@ class Ship (Collidable):
     return self.points
   def add_points(self, points=200):
     self.points += points * self.points_multiplier
+    if self.points_multiplier != 1:
+      self.points_multiplier = 1
 
   def bonus_colleted(self):
     return self.bonus_colleted
@@ -162,6 +164,7 @@ class game:
   BONUS_TIME = 3000
   BONUS_PROBABILITY = 0.5
   PADDING_MENU = 50
+  POINTS_TO_ADD = 0
 
   def __init__(self):
       pygame.init()
@@ -201,14 +204,15 @@ class game:
       self.movement = False
 
       # Sounds
+      volume = 0.005
       self.sound_bonus_extra_life = pygame.mixer.Sound("sounds/extra_life.wav")
-      self.sound_bonus_extra_life.set_volume(0.05)
+      self.sound_bonus_extra_life.set_volume(volume)
 
       self.sound_bonus_double_points = pygame.mixer.Sound("sounds/double_points.wav")
-      self.sound_bonus_double_points.set_volume(0.05)
+      self.sound_bonus_double_points.set_volume(volume)
 
       self.sound_bonus_shield = pygame.mixer.Sound("sounds/shield.wav")
-      self.sound_bonus_shield.set_volume(0.05)
+      self.sound_bonus_shield.set_volume(volume)
 
   def run(self):
       clock = pygame.time.Clock()
@@ -265,6 +269,10 @@ class game:
           # Actualizar colisiones
           self.collision_observer.update()
 
+          if game.POINTS_TO_ADD > 0:
+             self.inst_ship.add_points(game.POINTS_TO_ADD)
+             game.POINTS_TO_ADD = 0
+
           pygame.display.flip()
 
           self.check_killed()
@@ -309,6 +317,12 @@ class game:
             self.inst_ship.bullet_types.insert(0, BulletShipType.CHASING)
             self.inst_ship.bullet_types.insert(0, BulletShipType.CHASING)
             self.inst_ship.bonus_colleted.pop(0)
+          elif selected_bonus.type == BonusType.EXPANDING_BULLET:
+            self.inst_ship.bullet_types.insert(0, BulletShipType.EXPANDING)
+            self.inst_ship.bonus_colleted.pop(0)
+          elif selected_bonus.type == BonusType.DOUBLE_POINTS:
+             self.inst_ship.points_multiplier = 2
+             self.inst_ship.bonus_colleted.pop(0)
           else:
               active_bonuses.pop(0)
   def draw_colleted_bonuses(self,font,text_color = (0, 255, 255) ):
@@ -385,16 +399,47 @@ class game:
     self.screen.blit(text_surface, (text_x, text_y))
 
   def draw_points(self, font, text_color):
-    points_text = f"Points: {self.inst_ship.points}"
-    text_surface = font.render(points_text, True, text_color)
-    text_x = game.SCREEN_WIDTH // 2 - text_surface.get_width() // 2
-    text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
+    if self.inst_ship.points_multiplier != 1:
+      points_text = f"Points: {self.inst_ship.points}\nNext are x({self.inst_ship.points_multiplier})"
+      lines = points_text.split('\n')
+      text_surfaces = [font.render(line, True, text_color) for line in lines]
 
-    self.screen.blit(text_surface, (text_x, text_y))
+      total_height = sum(surface.get_height() for surface in text_surfaces)
+      max_width = max(surface.get_width() for surface in text_surfaces)
+
+      text_x = game.SCREEN_WIDTH // 2 - max_width // 2 - Bonus.WIDTH
+      text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - total_height // 2
+
+      for surface in text_surfaces:
+        self.screen.blit(surface, (text_x, text_y))
+        text_y += surface.get_height()
+    else:
+      points_text = f"Points: {self.inst_ship.points}"
+      text_surface = font.render(points_text, True, text_color)
+      text_x = game.SCREEN_WIDTH // 2 - text_surface.get_width() // 2 - Bonus.WIDTH
+      text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
+      self.screen.blit(text_surface, (text_x, text_y))
+  def draw_next_bullet(self, font, text_color):
+    next_bullet = self.inst_ship.bullet_types[0].value
+    next_bullet_text = f"Next\nbullet:\n{next_bullet}"
+    
+    lines = next_bullet_text.split('\n')
+    text_surfaces = [font.render(line, True, text_color) for line in lines]
+    
+    total_height = sum(surface.get_height() for surface in text_surfaces)
+    max_width = max(surface.get_width() for surface in text_surfaces)
+    
+    text_x = game.SCREEN_WIDTH // 2 - max_width // 2
+    text_x += 3 * Bonus.WIDTH
+    text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - total_height // 2
+    
+    for surface in text_surfaces:
+      self.screen.blit(surface, (text_x, text_y))
+      text_y += surface.get_height()
           
   def draw_menu_game(self):
     font_path = "fonts/GenericTechno.otf"
-    font_size = 12
+    font_size = 11
     font = pygame.font.Font(font_path, font_size)
     text_color = (255, 255, 255)  # Blanco
     pygame.draw.rect(self.screen, 
@@ -410,6 +455,7 @@ class game:
     self.draw_level(font, text_color)
     self.draw_time(font, text_color)
     self.draw_points(font, text_color)
+    self.draw_next_bullet(font, text_color)
 
   def draw_and_update_all_entities(self, keys):
     for entity in self.inst_entities:
@@ -569,7 +615,7 @@ class BulletShip(Collidable):
 
   def update(self):
     if self.bullet_type == BulletShipType.CHASING:
-      self.rect.y -= 5
+      self.rect.y -= 1
       self.rect.x += 10
     else:
       self.rect.y -= 5
@@ -586,6 +632,7 @@ class BulletShip(Collidable):
   def on_collision(self, other):
     if isinstance(other, Enemy):
         self.kill()
+        game.POINTS_TO_ADD += 200
                 
 if __name__ == "__main__":
   inst_galacta = galacta()
