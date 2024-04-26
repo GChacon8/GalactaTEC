@@ -7,8 +7,12 @@ import AnimatedGIF
 
 class login:
     def __init__(self, window, animated_gif):
+        self.player = "player1"
+        self.key = 0 #llave del jugador principal
         self.window = window
         self.animated_gif = animated_gif
+
+    def showLogin(self):
         self.window.title("GalactaTEC")
         self.window.configure(bg="#120043")
         self.window.geometry("800x600")
@@ -69,17 +73,33 @@ class login:
         # Verificar las credenciales con los datos del archivo JSON
         for usuario in data:
             if usuario["username"] == username and usuario["password"] == password:
-                self.clear_win()
-                menu.init_menu(self.window, self.animated_gif, usuario["key"])
-                return
+                print(self.player)
+                if self.player == "player1":
+                        self.clear_win()
+                        self.key = usuario["key"]   # llave del usuario que inicia sesion
+                        win = menu.init_menu(self.window, self.animated_gif, self.key)
+                        win.showMenu()
+                        return
+                elif self.player == "player2":
+                        print("Player1: ", self.key)
+                        print("Player2: ", usuario["key"])
+                        if(self.key == usuario["key"]): # se intenta iniciar sesion dos veces en la misma cuenta
+                             messagebox.showwarning("Error", "Your session on this account is already active")
+                        else:
+                            self.clear_win()
+                            multiplayer = menu.init_menu(self.window, self.animated_gif, self.key)
+                            multiplayer.multiplayer(self.key, usuario["key"])
+                            multiplayer.showMenu()
+                else:
+                     # Si no se encuentra el usuario en el archivo JSON o las credenciales son incorrectas
+                    messagebox.showerror("Error", "Wrong credentials. Please try again.")
 
-        # Si no se encuentra el usuario en el archivo JSON o las credenciales son incorrectas
-        messagebox.showerror("Error", "Wrong credentials. Please try again.")
-        
     def createUser(self):
         import newUser
         self.clear_win()
-        newUser.newUser(self.window, self.animated_gif, 0)  
+        create = newUser.newUser(self.window, self.animated_gif, 0)
+        create.showConfig()
+
 
     def clear_win(self):
         for widget in self.window.winfo_children():

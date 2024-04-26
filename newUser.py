@@ -10,7 +10,9 @@ import menu
 
 class newUser:
     def __init__(self, window, animated_gif, key):
-        self.key = key
+        self.key = key #llave de usuario a modificar
+        self.key1 = 0 #llaves de las cuentas que iniciaron sesion (para el goBack)
+        self.key2 = 0
         self.window = window
         self.animated_gif = animated_gif
         self.filename = None
@@ -22,6 +24,9 @@ class newUser:
 
         self.etiqueta = tk.Label(self.window, text="¡GalactaTEC!", font=("Fixedsys", 30, "italic"), bg="#120043", fg="white")
         self.etiqueta.place(relx=0.5, rely=0.1, anchor="center")
+
+
+    def showConfig(self):
 
         # Etiqueta y campo de entrada para el nombre de usuario
         self.username = tk.Label(self.window, text="Username:", font=("Fixedsys", 15), bg="#120043", fg="white")
@@ -76,6 +81,7 @@ class newUser:
             self.btnCreate = tk.Button(self.window, text=" ★ Create User ★ ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.createUser)
             self.btnCreate.place(relx=0.5, rely=0.8, anchor="center") 
 
+        #modificar usuario
         else:
             self.setOriginalValues()
             self.btnCancel = tk.Button(self.window, text=" Cancel ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.createUser)
@@ -96,12 +102,20 @@ class newUser:
                 widget.destroy()
 
     def goBack(self):
+        self.clear_win()
         if self.key == 0:
-            self.clear_win()
-            login.login(self.window, self.animated_gif)
+            win = login.login(self.window, self.animated_gif)
+            win.showLogin()
         else:
-            self.clear_win()
-            menu.init_menu(self.window, self.animated_gif, self.key)
+            if(self.key2 == 0): #juego individual
+                win = menu.init_menu(self.window, self.animated_gif, self.key)
+                win.showMenu()
+            else: #multijugador
+                win = menu.init_menu(self.window, self.animated_gif, self.key1)
+                win.multiplayer(self.key1, self.key2)
+                win.showMenu()
+
+
 
     def setOriginalValues(self):
 

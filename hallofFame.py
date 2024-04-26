@@ -5,6 +5,8 @@ from PIL import Image, ImageTk
 class hallofFame:
     def __init__(self, window, animated_gif, key):
         self.key = key
+        self.key1 = 0 #llaves de las cuentas que iniciaron sesion (para el goBack)
+        self.key2 = 0
         self.window = window
         self.animated_gif = animated_gif
         self.filename = None
@@ -17,7 +19,7 @@ class hallofFame:
         self.window.configure(bg="#120043")
         self.window.geometry(f"{self.SCREEN_WIDTH}x{self.SCREEN_HEIGHT}")
 
-
+    def showHall(self):
         self.etiqueta = tk.Label(self.window, text="!Hall Of Fame!", font=("Fixedsys", 30, "italic"), bg="#120043", fg="white")
         self.etiqueta.place(relx=0.5, rely=0.1, anchor="center")
 
@@ -32,6 +34,9 @@ class hallofFame:
 
         # Mostrar la lista de usuarios en la ventana
         self.mostrar_lista()
+
+        self.btnBack = tk.Button(self.window, text=" Go Back ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.goBack)
+        self.btnBack.place(relx=0.5, rely=0.85, anchor="center") 
 
     def mostrar_lista(self):
     # Mostrar los datos de los primeros usuarios en la ventana
@@ -73,6 +78,22 @@ class hallofFame:
             puntaje_label = tk.Label(self.window, text=puntaje, bg="#120043", fg="white")
             puntaje_label.place(relx=(self.SCREEN_WIDTH / 2 + relx_centered+75) / self.SCREEN_WIDTH, rely=(vertical_offset + self.SCREEN_HEIGHT*0.2) / self.SCREEN_HEIGHT, anchor="center")
 
+    def goBack(self):
+        self.clear_win()
+        import menu
+        if(self.key2 == 0): #juego individual
+            win = menu.init_menu(self.window, self.animated_gif, self.key)
+            win.showMenu()
+        else: #multijugador
+            win = menu.init_menu(self.window, self.animated_gif, self.key1)
+            win.multiplayer(self.key1, self.key2)
+            win.showMenu()
+
+    def clear_win(self):
+        for widget in self.window.winfo_children():
+            if widget != self.animated_gif:
+                widget.destroy()
+
 
             
 
@@ -80,4 +101,4 @@ class hallofFame:
 window = tk.Tk()
 hallofFame(window, None, None)
 window.mainloop()
-"""
+#"""
