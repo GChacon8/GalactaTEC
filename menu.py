@@ -27,11 +27,11 @@ class init_menu:
     self.btnHallofFame = tk.Button(self.window, text="Hall of Fame", font=("Fixedsys", 15), command=self.hallofFame)
     self.btnHallofFame.place(relx=0.5, rely=0.5, anchor="center", width=230)  
 
-      self.btnStartGame = tk.Button(self.window, text="Start Game", font=("Fixedsys", 15), command=self.clear_win)
-      self.btnStartGame.place(relx=0.5, rely=0.6, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
+    self.btnStartGame = tk.Button(self.window, text="Start Game", font=("Fixedsys", 15), command=self.clear_win)
+    self.btnStartGame.place(relx=0.5, rely=0.6, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
 
-      self.btnHelp = tk.Button(self.window, text="How To Play", font=("Fixedsys", 15), command=self.howToPlay)
-      self.btnHelp.place(relx=0.5, rely=0.7, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
+    self.btnHelp = tk.Button(self.window, text="How To Play", font=("Fixedsys", 15), command=self.howToPlay)
+    self.btnHelp.place(relx=0.5, rely=0.7, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
 
     self.btnExit = tk.Button(self.window, text="Exit", font=("Fixedsys", 15), command=self.clear_win) 
 
@@ -47,7 +47,7 @@ class init_menu:
 
       self.window.mainloop()
 
-   def initPlayer2(self):
+  def initPlayer2(self):
       self.clear_win()
       import login
       login2 = login.login(self.window, self.animated_gif) #llamar a login para el jugador 2
@@ -76,41 +76,41 @@ class init_menu:
     # Configura una función que se llamará cuando cambie la selección del jugador
     self.selected_player.trace("w", lambda *args: on_select())
 
-   def userSettings(self):
-      import newUser
-      self.clear_win()
-      config = newUser.newUser(self.window, self.animated_gif, self.key)
-     config.key1 = self.key1
-     config.key2 = self.key2
-     config.showConfig()
+  def userSettings(self):
+    import newUser
+    self.clear_win()
+    config = newUser.newUser(self.window, self.animated_gif, self.key)
+    config.key1 = self.key1
+    config.key2 = self.key2
+    config.showConfig()
      
    
-   def hallofFame(self):
-      import hallofFame
-      self.clear_win()
-      hall = hallofFame.hallofFame(self.window, self.animated_gif, self.key)
-     hall.key1 = self.key1
-     hall.key2 = self.key2
-     hall.showHall()
+  def hallofFame(self):
+    import hallofFame
+    self.clear_win()
+    hall = hallofFame.hallofFame(self.window, self.animated_gif, self.key)
+    hall.key1 = self.key1
+    hall.key2 = self.key2
+    hall.showHall()
 
 
-   def gameSettings(self):
+  def gameSettings(self):
       import gameConfiguration
       self.clear_win()
       gameConfiguration.gameConfiguration(self.window, self.animated_gif, self.key)
    
-   def howToPlay(self):
+  def howToPlay(self):
       import howToPlay
       self.clear_win()
       howToPlay.howtoplay(self.window, self.animated_gif, self.key)
 
       
    
-   def clear_win(self):
+  def clear_win(self):
          for widget in self.window.winfo_children():
             if widget != self.animated_gif:
                widget.destroy()
       
-   def gotoProfiles(self):
+  def gotoProfiles(self):
       self.clear_win()
      
