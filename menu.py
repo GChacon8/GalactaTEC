@@ -21,7 +21,7 @@ class init_menu:
     self.btnUserSettings = tk.Button(self.window, text="User Settings", font=("Fixedsys", 15), command=self.userSettings)
     self.btnUserSettings.place(relx=0.5, rely=0.3, anchor="center", width=230)  
   
-    self.btnGameSettings = tk.Button(self.window, text="Game Settings", font=("Fixedsys", 15), command=self.clear_win)
+    self.btnGameSettings = tk.Button(self.window, text="Game Settings", font=("Fixedsys", 15), command=self.gameSettings)
     self.btnGameSettings.place(relx=0.5, rely=0.4, anchor="center", width=230) 
 
     self.btnHallofFame = tk.Button(self.window, text="Hall of Fame", font=("Fixedsys", 15), command=self.hallofFame)
@@ -31,7 +31,6 @@ class init_menu:
     self.btnStartGame.place(relx=0.5, rely=0.6, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
 
     self.btnHelp = tk.Button(self.window, text="How To Play", font=("Fixedsys", 15), command=self.howToPlay)
-    self.btnHelp.place(relx=0.5, rely=0.7, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
 
     self.btnExit = tk.Button(self.window, text="Exit", font=("Fixedsys", 15), command=self.clear_win) 
 
@@ -39,11 +38,13 @@ class init_menu:
       self.btnInitP2 = tk.Button(self.window, text="Start Player 2", font=("Fixedsys", 15), command=self.initPlayer2)
       self.btnInitP2.place(relx=0.5, rely=0.6, anchor="center", width=230)  
       self.btnStartGame.place(relx=0.5, rely=0.7, anchor="center", width=230) 
-      self.btnExit.place(relx=0.5, rely=0.8, anchor="center", width=230) 
+      self.btnHelp.place(relx=0.5, rely=0.8, anchor="center", width=230) 
+      self.btnExit.place(relx=0.5, rely=0.9, anchor="center", width=230) 
 
     else:
       self.btnStartGame.place(relx=0.5, rely=0.6, anchor="center", width=230)
-      self.btnExit.place(relx=0.5, rely=0.7, anchor="center", width=230) 
+      self.btnHelp.place(relx=0.5, rely=0.7, anchor="center", width=230) 
+      self.btnExit.place(relx=0.5, rely=0.8, anchor="center", width=230) 
 
       self.window.mainloop()
 

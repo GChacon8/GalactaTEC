@@ -4,6 +4,8 @@ from tkinter import PhotoImage
 class howtoplay:
     def __init__(self, window, animated_gif, key):
         self.key = key
+        self.key1 = 0 #llaves de las cuentas que iniciaron sesion (para el goBack)
+        self.key2 = 0
         self.window = window
         self.animated_gif = animated_gif
         self.filename = None
@@ -72,12 +74,23 @@ class howtoplay:
         btnBack = tk.Button(self.window, text=" Go Back ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.goBack)
         btnBack.place(relx=0.5, rely=0.9, anchor="center") 
 
-    def goBack(self):
-        import menu
+
+    def clear_win(self):
         for widget in self.window.winfo_children():
             if widget != self.animated_gif:
                 widget.destroy()
-        menu.init_menu(self.window, self.animated_gif, self.key)
+
+
+    def goBack(self):
+        self.clear_win()
+        import menu
+        if(self.key2 == 0): #juego individual
+            win = menu.init_menu(self.window, self.animated_gif, self.key)
+            win.showMenu()
+        else: #multijugador
+            win = menu.init_menu(self.window, self.animated_gif, self.key1)
+            win.multiplayer(self.key1, self.key2)
+            win.showMenu()
 
 
 
