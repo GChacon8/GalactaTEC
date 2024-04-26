@@ -19,34 +19,6 @@ class galacta:
     inst_game = game()
     inst_game.run()
 
-
-class BulletShipType(enum.Enum):
-  CHASING_BULLET = "Chasing Bullet"
-  EXPANDING_BULLET = "Expanding Bullet"
-  DOUBLE_POINTS = "Double Points"
-  SHIELD = "Shield"
-  EXTRA_LIFE = "Extra Life"
-
-class BulletShip (Collidable):
-  WIDTH = 10
-
-  def __init__(self, ship):
-    super().__init__()
-    self.image = pygame.image.load("Images/bullet.png")
-    self.image = pygame.transform.smoothscale(self.image, (BulletShip.WIDTH, BulletShip.WIDTH))
-    self.rect = self.image.get_rect()
-    self.rect.center = ship.rect.center
-
-  def draw(self, screen: pygame.Surface):
-    if self.active:
-      screen.blit(self.image, self.rect)
-
-  def on_collision(self, other: Collidable):
-    print("Bullet collided with:", other)
-
-  def desactive(self):
-    self.active = False
-
 class Ship (Collidable):
 
   WIDTH = 80
@@ -74,6 +46,21 @@ class Ship (Collidable):
     self.points_multiplier = 1
 
     self.invulnerable_time = 0
+
+
+    # Aviable Bullet Type 
+    self.bullet_types = [BulletShipType.SIMPLE]  # Por defecto, solo tiene balas simples
+
+    # Sounds OF Bullets
+    self.sound_bonus_chasing_bullet = pygame.mixer.Sound("sounds/chasing_bullet.wav")
+    self.sound_bonus_chasing_bullet.set_volume(0.05)
+
+    self.sound_bonus_expanding_bullet = pygame.mixer.Sound("sounds/expanding_bullet.wav")
+    self.sound_bonus_expanding_bullet.set_volume(0.05)
+
+    self.sound_bullet = pygame.mixer.Sound("sounds/bullet.wav")
+    self.sound_bullet.set_volume(0.05)
+
 
   def update(self, keys):
     if self.invulnerable_time > 0:
@@ -125,6 +112,19 @@ class Ship (Collidable):
 
   def desactive(self):
     self.active = False
+  
+  def shoot(self):
+    bullet_type = self.bullet_types[0]  # Obtiene el primer tipo de bala de la lista
+    bullet = BulletShip(self, bullet_type)
+    if bullet_type == BulletShipType.CHASING:
+      self.sound_bonus_chasing_bullet.play()
+      self.bullet_types.pop(0)
+    elif bullet_type == BulletShipType.EXPANDING:
+      self.sound_bonus_expanding_bullet.play()
+      self.bullet_types.pop(0)
+    else:
+      self.sound_bullet.play()
+    return bullet
 
 
 class AnimatedBackground(pygame.sprite.Sprite):
@@ -207,15 +207,8 @@ class game:
       self.sound_bonus_double_points = pygame.mixer.Sound("sounds/double_points.wav")
       self.sound_bonus_double_points.set_volume(0.05)
 
-      self.sound_bonus_chasing_bullet = pygame.mixer.Sound("sounds/chasing_bullet.wav")
-      self.sound_bonus_chasing_bullet.set_volume(0.05)
-
-      self.sound_bonus_expanding_bullet = pygame.mixer.Sound("sounds/expanding_bullet.wav")
-      self.sound_bonus_expanding_bullet.set_volume(0.05)
-
       self.sound_bonus_shield = pygame.mixer.Sound("sounds/shield.wav")
       self.sound_bonus_shield.set_volume(0.05)
-      
 
   def run(self):
       clock = pygame.time.Clock()
@@ -237,6 +230,12 @@ class game:
                       self.change_bonus()
                   elif event.key == pygame.K_p:
                       self.use_bonus()
+                  elif event.key == pygame.K_SPACE:
+                    bullet = self.inst_ship.shoot()
+                    if bullet:
+                        self.inst_entities.append(bullet)
+                        self.collision_observer.register([bullet])
+
 
           self.all_sprites.update(dt)
 
@@ -305,6 +304,11 @@ class game:
               self.collision_observer.register([self.shield]) # Add shield to collision observer
               self.sound_bonus_shield.play()
               active_bonuses.pop(0)
+          elif selected_bonus.type == BonusType.CHASING_BULLET:
+            self.inst_ship.bullet_types.insert(0, BulletShipType.CHASING)
+            self.inst_ship.bullet_types.insert(0, BulletShipType.CHASING)
+            self.inst_ship.bullet_types.insert(0, BulletShipType.CHASING)
+            self.inst_ship.bonus_colleted.pop(0)
           else:
               active_bonuses.pop(0)
   def draw_colleted_bonuses(self,font,text_color = (0, 255, 255) ):
@@ -414,7 +418,9 @@ class game:
       elif isinstance(entity, Bonus):
         entity.update()
       elif isinstance(entity, Shield):
-            entity.update(self.inst_ship.rect.centerx, self.inst_ship.rect.centery)
+        entity.update(self.inst_ship.rect.centerx, self.inst_ship.rect.centery)
+      elif isinstance(entity, BulletShip):
+        entity.update()
       entity.draw(self.screen)
     self.draw_menu_game()
 
@@ -534,6 +540,52 @@ class Shield(Collidable):
             self.level -= 1
             if self.level <= 0:
                 self.kill()
+
+
+## BulletShip
+
+class BulletShipType(enum.Enum):
+    SIMPLE = "Simple"
+    CHASING = "Chasing"
+    EXPANDING = "Expanding"
+
+class BulletShip(Collidable):
+  WIDTH = 20
+
+  def __init__(self, ship, bullet_type=BulletShipType.SIMPLE):
+    super().__init__()
+    if bullet_type == BulletShipType.CHASING:
+        self.image = pygame.image.load("Images/chasing_bullet.png")
+    elif bullet_type == BulletShipType.EXPANDING:
+        self.image = pygame.image.load("Images/expanding_bullet.png")
+    else:
+      self.image = pygame.image.load("Images/simple_bullet.png")
+    self.image = pygame.transform.scale(self.image, (BulletShip.WIDTH, BulletShip.WIDTH))  # Ajusta el tamaño de la bala
+    self.rect = self.image.get_rect()
+    self.rect.center = ship.rect.center
+    self.rect.y -= BulletShip.WIDTH*4
+    self.bullet_type = bullet_type
+    self.active = True
+
+  def update(self):
+    if self.bullet_type == BulletShipType.CHASING:
+      self.rect.y -= 5
+      self.rect.x += 10
+    else:
+      self.rect.y -= 5
+
+    if self.rect.y < 0 or self.rect.x > game.SCREEN_WIDTH or self.rect.x < 0:
+      self.kill()
+
+
+
+  def draw(self, screen):
+    if self.active:
+      screen.blit(self.image, self.rect)
+
+  def on_collision(self, other):
+    if isinstance(other, Enemy):
+        self.kill()
                 
 if __name__ == "__main__":
   inst_galacta = galacta()
