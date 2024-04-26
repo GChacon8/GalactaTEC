@@ -106,16 +106,6 @@ class AnimatedBackground(pygame.sprite.Sprite):
             self.current_time = 0
             self.image = next(self.images)
 
-
-def load_images(path, target_size):
-    images = []
-    for file_name in sorted(os.listdir(path)):
-        image = pygame.image.load(os.path.join(path, file_name)).convert()
-        image = pygame.transform.scale(image, target_size)
-        images.append(image)
-    return images
-
-
 class game:
     
     SCREEN_WIDTH = 800
