@@ -69,7 +69,7 @@ class Ship (Collidable):
       self.rect.y += self.speed
     # Limitar la nave dentro de los límites de la pantalla
     self.rect.x = max(0, min(self.rect.x, game.SCREEN_WIDTH - self.rect.width))
-    self.rect.y = max(0, min(self.rect.y, game.SCREEN_HEIGHT - self.rect.height))
+    self.rect.y = max(0, min(self.rect.y, game.SCREEN_HEIGHT - self.rect.height-50)) 
 
   def draw(self, screen: pygame.Surface):
     if self.active:
@@ -106,16 +106,6 @@ class AnimatedBackground(pygame.sprite.Sprite):
             self.current_time = 0
             self.image = next(self.images)
 
-
-def load_images(path, target_size):
-    images = []
-    for file_name in sorted(os.listdir(path)):
-        image = pygame.image.load(os.path.join(path, file_name)).convert()
-        image = pygame.transform.scale(image, target_size)
-        images.append(image)
-    return images
-
-
 class game:
     
     SCREEN_WIDTH = 800
@@ -140,7 +130,7 @@ class game:
         self.inst_ship = Ship()
         enemies = EnemyFactory.create_enemies(6, 6)
         self.inst_enemies = enemies[0]
-        self.inst_enemyMovement = EnemyMovement(self.inst_enemies)
+        self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
         self.bullets = []
         self.available_bonus_types = list(BonusType)  # Lista de tipos de bonos disponibles
         self.bonus_timer = 0
@@ -201,8 +191,6 @@ class game:
               self.t=0
             else:
               self.t+=2 #cambiar a +=1
-
-
             keys = pygame.key.get_pressed()
             self.draw_and_update_all_entities(keys)
 
@@ -310,6 +298,8 @@ class game:
         elif isinstance(entity, Bonus):
           entity.update()
         entity.draw(self.screen)
+        pygame.draw.line(self.screen, (255,255,255), (0, self.SCREEN_HEIGHT-50), (self.SCREEN_WIDTH, self.SCREEN_HEIGHT-50), 5)  # Coordenadas de inicio, fin, y grosor
+
       self.draw_colleted_bonuses()
 
     def check_killed(self):
@@ -385,7 +375,7 @@ class Bonus(Collidable):
     def update(self):
         # Mover el bonus hacia abajo en la pantalla
         self.rect.y += 5
-        if self.rect.y > game.SCREEN_HEIGHT+ 1.5*Bonus.WIDTH :  # Suponiendo que el límite inferior es 600
+        if self.rect.y > game.SCREEN_HEIGHT-50:  # Suponiendo que el límite inferior es 600
             self.kill()
 
 

@@ -249,7 +249,8 @@ class newUser:
             "email": email,
             "photo": photo,
             "ship": ship,
-            "music": music}
+            "music": music,
+            "highscore": "0"}
         
         # Agregar el nuevo usuario a la lista de datos existentes
         data.append(user)
@@ -257,6 +258,8 @@ class newUser:
         # Escribir los datos actualizados en el archivo JSON
         with open("data.json", "w") as json_file:
             json.dump(data, json_file, indent=4)
+        
+        self.goBack()
             
 
     def saveChanges(self):
@@ -296,7 +299,8 @@ class newUser:
                 "email": email,
                 "photo": photo,
                 "ship": ship,
-                "music": music}
+                "music": music,
+                "highscore": "0"}
         
         with open("data.json") as json_file:
             data = json.load(json_file)

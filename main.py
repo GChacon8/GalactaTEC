@@ -2,6 +2,8 @@ import login
 import tkinter as tk
 import AnimatedGIF
 
+from menu import init_menu
+
 
 class main:
     def __init__(self):
@@ -15,5 +17,7 @@ class main:
         self.animated_gif = AnimatedGIF.AnimatedGIF(self.window, gif_path)
         self.animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
         login.login(self.window, self.animated_gif)
+        
+
 
 main()
