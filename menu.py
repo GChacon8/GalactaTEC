@@ -6,8 +6,6 @@ class init_menu:
     self.key = key 
     self.key1 = key
     self.key2 = 0
-    self.key = key 
-    self.key2 = 0
     self.window = window
     self.animated_gif = animated_gif
 
