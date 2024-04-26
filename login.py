@@ -77,7 +77,8 @@ class login:
                 if self.player == "player1":
                         self.clear_win()
                         self.key = usuario["key"]   # llave del usuario que inicia sesion
-                        menu.init_menu(self.window, self.animated_gif, self.key)
+                        win = menu.init_menu(self.window, self.animated_gif, self.key)
+                        win.showMenu()
                         return
                 elif self.player == "player2":
                         print("Player1: ", self.key)
@@ -86,9 +87,9 @@ class login:
                              messagebox.showwarning("Error", "Your session on this account is already active")
                         else:
                             self.clear_win()
-                            menu2 =  menu.init_menu(self.window, self.animated_gif, self.key)
-                            menu2.key2 = usuario["key"]
-                            return
+                            multiplayer = menu.init_menu(self.window, self.animated_gif, self.key)
+                            multiplayer.multiplayer(self.key, usuario["key"])
+                            multiplayer.showMenu()
                 else:
                      # Si no se encuentra el usuario en el archivo JSON o las credenciales son incorrectas
                     messagebox.showerror("Error", "Wrong credentials. Please try again.")
@@ -96,7 +97,9 @@ class login:
     def createUser(self):
         import newUser
         self.clear_win()
-        newUser.newUser(self.window, self.animated_gif, 0)  
+        create = newUser.newUser(self.window, self.animated_gif, 0)
+        create.showConfig()
+
 
     def clear_win(self):
         for widget in self.window.winfo_children():
