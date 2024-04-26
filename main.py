@@ -18,5 +18,4 @@ class main:
         win = login.login(self.window, self.animated_gif)
         win.showLogin()
         
->>>>>>> Stashed changes
 main()
