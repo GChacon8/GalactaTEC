@@ -73,8 +73,16 @@ class hallofFame:
             puntaje_label = tk.Label(self.window, text=puntaje, bg="#120043", fg="white")
             puntaje_label.place(relx=(self.SCREEN_WIDTH / 2 + relx_centered+75) / self.SCREEN_WIDTH, rely=(vertical_offset + self.SCREEN_HEIGHT*0.2) / self.SCREEN_HEIGHT, anchor="center")
 
+        btnBack = tk.Button(self.window, text=" Go Back ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.goBack)
+        btnBack.place(relx=0.5, rely=0.9, anchor="center") 
 
-            
+    def goBack(self):
+        import menu
+        for widget in self.window.winfo_children():
+            if widget != self.animated_gif:
+                widget.destroy()
+        menu.init_menu(self.window, self.animated_gif, self.key)
+
 
 """
 window = tk.Tk()
