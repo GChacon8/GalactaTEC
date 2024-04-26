@@ -78,6 +78,7 @@ class CollisionObserver:
         self.collidables.extend(collidable)
 
     def update(self):
+
         # Evita comprobar el mismo par dos veces
         for i in range(len(self.collidables)):
             for j in range(i + 1, len(self.collidables)):
@@ -89,10 +90,13 @@ class CollisionObserver:
                    ):
                         collidable1.on_collision(collidable2)
                         collidable2.on_collision(collidable1)
-                        if collidable1.get_isAlive() == False:
+                        cond1 = collidable1.get_isAlive()
+                        cond2 = collidable2.get_isAlive()
+                        if cond1== False:
                             self.collidables.remove(collidable1)
-                            # print(collidable1.__class__.__name__)
 
-                        if collidable2.get_isAlive() == False:
+                        if cond2 == False:
                             self.collidables.remove(collidable2)
-                            # print(collidable2.__class__.__name__)
+                        if cond1== False or cond2== False:
+                            return
+
