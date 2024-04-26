@@ -5,8 +5,8 @@ class EnemyMovement:
         self.moving_rigth = True
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
-        print("el ancho es: ", self.screenWidth)
-        print("el alto es: ", self.screenHeight)
+        # print("el ancho es: ", self.screenWidth)
+        # print("el alto es: ", self.screenHeight)
        
 
 
