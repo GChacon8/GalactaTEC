@@ -28,12 +28,3 @@ class EnemyFactory:
             startx=0
             starty+=40
         return (enemies,enemies_list)
-
-
-
-    
-"""
-enemies=[]
-       for i in range(row):
-           enemies.append(Enemy(200))
-           """
