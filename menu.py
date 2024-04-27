@@ -1,6 +1,7 @@
 import tkinter as tk
 import AnimatedGIF
-
+import GalactaTEC
+from GalactaTEC import game
 class init_menu:
   def __init__(self, window, animated_gif, key):
     self.key = key 
@@ -27,7 +28,7 @@ class init_menu:
     self.btnHallofFame = tk.Button(self.window, text="Hall of Fame", font=("Fixedsys", 15), command=self.hallofFame)
     self.btnHallofFame.place(relx=0.5, rely=0.5, anchor="center", width=230)  
 
-    self.btnStartGame = tk.Button(self.window, text="Start Game", font=("Fixedsys", 15), command=self.clear_win)
+    self.btnStartGame = tk.Button(self.window, text="Start Game", font=("Fixedsys", 15), command=self.initGame)
     self.btnStartGame.place(relx=0.5, rely=0.6, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
 
     self.btnHelp = tk.Button(self.window, text="How To Play", font=("Fixedsys", 15), command=self.howToPlay)
@@ -104,8 +105,6 @@ class init_menu:
       import howToPlay
       self.clear_win()
       howToPlay.howtoplay(self.window, self.animated_gif, self.key)
-
-      
    
   def clear_win(self):
          for widget in self.window.winfo_children():
@@ -114,4 +113,8 @@ class init_menu:
       
   def gotoProfiles(self):
       self.clear_win()
-     
+    
+  def initGame(self):
+    self.window.destroy()
+    inst_game = game()
+    inst_game.run()
