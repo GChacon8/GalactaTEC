@@ -40,6 +40,7 @@ class Ship (Collidable):
     self.bonus_sound = pygame.mixer.Sound("sounds/bonus.wav")
     self.hit_sound = pygame.mixer.Sound("sounds/hit.wav") 
     self.hit_sound.set_volume(0.25)
+    self.moving_sound = pygame.mixer.Sound("sounds/move.mp3")
 
     self.life = 5
     self.points = 0
@@ -68,15 +69,20 @@ class Ship (Collidable):
 
     if keys[pygame.K_LEFT]:
       self.rect.x -= self.speed
+      self.moving_sound.play()
     if keys[pygame.K_RIGHT]:
       self.rect.x += self.speed
+      self.moving_sound.play()
     if keys[pygame.K_UP]:
       self.rect.y -= self.speed
+      self.moving_sound.play()
     if keys[pygame.K_DOWN]:
       self.rect.y += self.speed
+      self.moving_sound.play()
     # Limitar la nave dentro de los límites de la pantalla
     self.rect.x = max(0, min(self.rect.x, game.SCREEN_WIDTH - self.rect.width))
-    self.rect.y = max(0, min(self.rect.y, game.SCREEN_HEIGHT - self.rect.height-50)) 
+    self.rect.y = max(0, min(self.rect.y, game.SCREEN_HEIGHT - self.rect.height-50))
+
 
   def draw(self, screen: pygame.Surface):
       if self.active:
