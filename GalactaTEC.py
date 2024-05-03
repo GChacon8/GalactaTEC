@@ -6,6 +6,7 @@ import os
 import random
 import menu
 import login
+import json
 
 from Enemy import Enemy
 from Factory import EnemyFactory
@@ -24,9 +25,25 @@ class Ship (Collidable):
   WIDTH = 80
   INVISIBLE_TIME = 4 # 4 segundos
 
-  def __init__(self):
+  def __init__(self, player, numPlayer):
     super().__init__()
-    self.image = pygame.image.load("Images/spaceship.png")
+
+    print("Empieza a jugar el jugador:")
+    print(numPlayer)
+
+    with open('data.json', 'r') as file:
+    # Cargar el JSON desde el archivo
+      data = json.load(file)
+
+    print("PLAYEER")
+    print(player)
+    user_data = None
+    for user in data:
+      if user["key"] == player:
+         user_data = user
+    
+
+    self.image = pygame.image.load(user_data["ship"])
     self.image = pygame.transform.smoothscale(self.image, (Ship.WIDTH, Ship.WIDTH))
     self.rect = self.image.get_rect()
     self.rect.center = (int(game.SCREEN_WIDTH / 2)-int(0.5*Ship.WIDTH), 
@@ -162,7 +179,7 @@ class game:
   PADDING_MENU = 50
   POINTS_TO_ADD = 0
 
-  def __init__(self):
+  def __init__(self, key1, key2 = None):
       pygame.init()
       self.width = game.SCREEN_WIDTH
       self.height = game.SCREEN_HEIGHT
@@ -175,7 +192,17 @@ class game:
 
       pygame.display.set_caption("GalactaTEC")
 
-      self.inst_ship = Ship()
+      if key2 == None:
+        self.inst_ship = Ship(key1, 1)
+      else:
+        ran = random.randint(1,2)
+        if ran ==1:
+          self.inst_ship = Ship(key1, 1)
+        else:
+          self.inst_ship = Ship(key2, 2)
+           
+            
+            
       enemies = EnemyFactory.create_enemies(6, 6)
       self.inst_enemies = enemies[0]
       self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT)

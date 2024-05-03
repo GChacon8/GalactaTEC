@@ -28,7 +28,7 @@ class init_menu:
     self.btnHallofFame = tk.Button(self.window, text="Hall of Fame", font=("Fixedsys", 15), command=self.hallofFame)
     self.btnHallofFame.place(relx=0.5, rely=0.5, anchor="center", width=230)  
 
-    self.btnStartGame = tk.Button(self.window, text="Start Game", font=("Fixedsys", 15), command=self.initGame)
+    self.btnStartGame = tk.Button(self.window, text="Start Game", font=("Fixedsys", 15), command=lambda: self.initGame(self.key1, self.key2))
     self.btnStartGame.place(relx=0.5, rely=0.6, anchor="center", width=230)  # Centra el botón horizontalmente y lo coloca 60% desde la parte superior
 
     self.btnHelp = tk.Button(self.window, text="How To Play", font=("Fixedsys", 15), command=self.howToPlay)
@@ -114,7 +114,12 @@ class init_menu:
   def gotoProfiles(self):
       self.clear_win()
     
-  def initGame(self):
+  def initGame(self, key1, key2):
     self.window.destroy()
-    inst_game = game()
-    inst_game.run()
+    if key2 == 0:
+      inst_game = game(key1)
+      inst_game.run()
+    else:
+        inst_game = game(key1, key2)
+        inst_game.run()
+    
