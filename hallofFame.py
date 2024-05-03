@@ -93,12 +93,3 @@ class hallofFame:
         for widget in self.window.winfo_children():
             if widget != self.animated_gif:
                 widget.destroy()
-
-
-            
-
-"""
-window = tk.Tk()
-hallofFame(window, None, None)
-window.mainloop()
-#"""

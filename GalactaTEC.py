@@ -6,6 +6,7 @@ import os
 import random
 import menu
 import login
+import json
 
 from Enemy import Enemy
 from Factory import EnemyFactory
@@ -24,9 +25,23 @@ class Ship (Collidable):
   WIDTH = 80
   INVISIBLE_TIME = 4 # 4 segundos
 
-  def __init__(self):
+  def __init__(self, player, numPlayer):
     super().__init__()
-    self.image = pygame.image.load("Images/spaceship.png")
+
+    print("Empieza a jugar el jugador:")
+    print(numPlayer)
+
+    with open('data.json', 'r') as file:
+    # Cargar el JSON desde el archivo
+      data = json.load(file)
+
+    user_data = None
+    for user in data:
+      if user["key"] == player:
+         user_data = user
+    
+
+    self.image = pygame.image.load(user_data["ship"])
     self.image = pygame.transform.smoothscale(self.image, (Ship.WIDTH, Ship.WIDTH))
     self.rect = self.image.get_rect()
     self.rect.center = (int(game.SCREEN_WIDTH / 2)-int(0.5*Ship.WIDTH), 
@@ -40,6 +55,8 @@ class Ship (Collidable):
     self.bonus_sound = pygame.mixer.Sound("sounds/bonus.wav")
     self.hit_sound = pygame.mixer.Sound("sounds/hit.wav") 
     self.hit_sound.set_volume(0.25)
+    self.moving_sound = pygame.mixer.Sound("sounds/move.mp3")
+    self.moving_sound.set_volume(0.5)
 
     self.life = 5
     self.points = 0
@@ -68,15 +85,20 @@ class Ship (Collidable):
 
     if keys[pygame.K_LEFT]:
       self.rect.x -= self.speed
+      self.moving_sound.play()
     if keys[pygame.K_RIGHT]:
       self.rect.x += self.speed
+      self.moving_sound.play()
     if keys[pygame.K_UP]:
       self.rect.y -= self.speed
+      self.moving_sound.play()
     if keys[pygame.K_DOWN]:
       self.rect.y += self.speed
+      self.moving_sound.play()
     # Limitar la nave dentro de los límites de la pantalla
     self.rect.x = max(0, min(self.rect.x, game.SCREEN_WIDTH - self.rect.width))
-    self.rect.y = max(0, min(self.rect.y, game.SCREEN_HEIGHT - self.rect.height-50)) 
+    self.rect.y = max(0, min(self.rect.y, game.SCREEN_HEIGHT - self.rect.height-50))
+
 
   def draw(self, screen: pygame.Surface):
       if self.active:
@@ -156,7 +178,7 @@ class game:
   PADDING_MENU = 50
   POINTS_TO_ADD = 0
 
-  def __init__(self):
+  def __init__(self, key1, key2 = None):
       pygame.init()
       self.width = game.SCREEN_WIDTH
       self.height = game.SCREEN_HEIGHT
@@ -169,7 +191,17 @@ class game:
 
       pygame.display.set_caption("GalactaTEC")
 
-      self.inst_ship = Ship()
+      if key2 == None:
+        self.inst_ship = Ship(key1, 1)
+      else:
+        ran = random.randint(1,2)
+        if ran ==1:
+          self.inst_ship = Ship(key1, 1)
+        else:
+          self.inst_ship = Ship(key2, 2)
+           
+            
+            
       enemies = EnemyFactory.create_enemies(6, 6)
       self.inst_enemies = enemies[0]
       self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
@@ -195,6 +227,10 @@ class game:
 
       # Sounds
       volume = 0.005
+
+      self.gameMusic = pygame.mixer.Sound("Songs/Spectre Music.mp3")
+      self.gameMusic.set_volume(0.5)
+
       self.sound_bonus_extra_life = pygame.mixer.Sound("sounds/extra_life.wav")
       self.sound_bonus_extra_life.set_volume(volume)
 
@@ -203,6 +239,8 @@ class game:
 
       self.sound_bonus_shield = pygame.mixer.Sound("sounds/shield.wav")
       self.sound_bonus_shield.set_volume(volume)
+
+      self.gameMusic.play()
 
   def run(self):
       clock = pygame.time.Clock()
