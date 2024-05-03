@@ -35,8 +35,6 @@ class Ship (Collidable):
     # Cargar el JSON desde el archivo
       data = json.load(file)
 
-    print("PLAYEER")
-    print(player)
     user_data = None
     for user in data:
       if user["key"] == player:
@@ -58,6 +56,7 @@ class Ship (Collidable):
     self.hit_sound = pygame.mixer.Sound("sounds/hit.wav") 
     self.hit_sound.set_volume(0.25)
     self.moving_sound = pygame.mixer.Sound("sounds/move.mp3")
+    self.moving_sound.set_volume(0.5)
 
     self.life = 5
     self.points = 0
@@ -228,6 +227,10 @@ class game:
 
       # Sounds
       volume = 0.005
+
+      self.gameMusic = pygame.mixer.Sound("Songs/Spectre Music.mp3")
+      self.gameMusic.set_volume(0.5)
+
       self.sound_bonus_extra_life = pygame.mixer.Sound("sounds/extra_life.wav")
       self.sound_bonus_extra_life.set_volume(volume)
 
@@ -236,6 +239,8 @@ class game:
 
       self.sound_bonus_shield = pygame.mixer.Sound("sounds/shield.wav")
       self.sound_bonus_shield.set_volume(volume)
+
+      self.gameMusic.play()
 
   def run(self):
       clock = pygame.time.Clock()
