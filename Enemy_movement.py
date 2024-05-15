@@ -7,8 +7,6 @@ class EnemyMovement:
         self.screenHeight = screenHeight
         # print("el ancho es: ", self.screenWidth)
         # print("el alto es: ", self.screenHeight)
-       
-
 
     def pattern_1(self):
         # print(self.inst_enemies[0][0].get_x_coords())
@@ -30,23 +28,3 @@ class EnemyMovement:
                         self.moving_rigth = True
                         break
                         
-    
-
-                  
-
-"""
-                if reference_enemy<505 and self.moving_rigth:
-                    j.move_rigth()
-                elif reference_enemy>=505:
-                    print(reference_enemy)
-                    self.moving_rigth = False
-                    self.moving_left = True
-                
-               
-                if reference_enemy>295 and self.moving_left:
-                    j.move_left()
-                elif reference_enemy<=295:
-                    self.moving_rigth = True
-                    self.moving_left = False
-                    
-"""

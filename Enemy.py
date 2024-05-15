@@ -2,8 +2,6 @@ import pygame
 import random
 from Observer import Collidable
 
-
-
 class Enemy(Collidable):
   def __init__(self,posx,posy):
     super().__init__()

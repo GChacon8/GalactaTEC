@@ -3,11 +3,11 @@
         "key": 1,
         "username": "gchacon8",
         "password": "12345678",
-        "full_name": "JGabriel Chacon Alfaro",
+        "full_name": "Gabriel Chacon Alfaro",
         "email": "gchacon8@estudiantec.com",
         "photo": "Images/spaceship.png",
         "ship": "Images/spaceship.png",
-        "music": "/ruta/al/archivo3.txt",
+        "music": "",
         "highscore": "1000"
     },
     {
@@ -42,7 +42,7 @@
         "full_name": "Daniel Castro",
         "email": "dcastroeli3009@gmail.com",
         "photo": "Images/pp2.png",
-        "ship": "/Images/ships/ship1.png",
+        "ship": "Images/ships/ship1.png",
         "music": [
             "D:/Tec/Cursos/Modelado/GalactaTEC/Songs/I Don't Care - VIRA.mp3"
         ],

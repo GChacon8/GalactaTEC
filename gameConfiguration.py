@@ -78,12 +78,3 @@ class gameConfiguration:
             win = menu.init_menu(self.window, self.animated_gif, self.key1)
             win.multiplayer(self.key1, self.key2)
             win.showMenu()
-
-
-
-
-"""
-window = tk.Tk()
-gameConfiguration(window, None, None)
-window.mainloop()
-#"""
