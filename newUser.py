@@ -273,7 +273,8 @@ class newUser:
             "email": email,
             "photo": photo,
             "ship": ship,
-            "music": music}
+            "music": music,
+            "highscore": "0"}
         
         # Agregar el nuevo usuario a la lista de datos existentes
         with open("data.json") as json_file:
@@ -331,7 +332,8 @@ class newUser:
                 "email": email,
                 "photo": photo,
                 "ship": ship,
-                "music": music}
+                "music": music,
+                "highscore": "0"}
         
         with open("data.json") as json_file:
             data = json.load(json_file)

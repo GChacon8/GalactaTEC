@@ -2,6 +2,8 @@ import login
 import tkinter as tk
 import AnimatedGIF
 
+from menu import init_menu
+
 
 class main:
     def __init__(self):
