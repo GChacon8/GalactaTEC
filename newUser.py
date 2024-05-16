@@ -1,3 +1,5 @@
+import datetime
+import random
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import AnimatedGIF
@@ -17,6 +19,9 @@ class newUser:
         self.animated_gif = animated_gif
         self.filename = None
         self.music_file = None
+
+        with open("data.json") as json_file:
+            self.data = json.load(json_file)
 
         self.window.title("GalactaTEC")
         self.window.configure(bg="#120043")
@@ -48,13 +53,23 @@ class newUser:
 
         self.entry_email = tk.Entry(self.window)
         self.entry_email.place(relx=0.6, rely=0.3, anchor="center", width=200)
+
+        self.btn_verify = tk.Button(self.window, text="Verify", font=("Fixedsys", 10), bg="#120043", fg="white", command=self.validateEmail)
+        self.btn_verify.place(relx=0.77, rely=0.3, anchor="center")
+
+        # Etiqueta y campo de entrada para el codigo de validacion del correo electronico
+        self.verify = tk.Label(self.window, text="Code:", font=("Fixedsys", 15), bg="#120043", fg="white")
+        self.verify.place(relx=0.4, rely=0.35, anchor="center")
+
+        self.entry_verify = tk.Entry(self.window)
+        self.entry_verify.place(relx=0.6, rely=0.35, anchor="center", width=200)
         
         # Etiqueta y campo de entrada para la contraseña
         self.password = tk.Label(self.window, text="Password:", font=("Fixedsys", 15), bg="#120043", fg="white")
-        self.password.place(relx=0.4, rely=0.35, anchor="center")
+        self.password.place(relx=0.4, rely=0.4, anchor="center")
 
         self.entry_password = tk.Entry(self.window)
-        self.entry_password.place(relx=0.6, rely=0.35, anchor="center", width=200)
+        self.entry_password.place(relx=0.6, rely=0.4, anchor="center", width=200)
 
         # Etiqueta y boton de entrada para la foto
         self.photo = tk.Label(self.window, text="Profile Picture:", font=("Fixedsys", 15), bg="#120043", fg="white")
@@ -115,17 +130,12 @@ class newUser:
                 win.multiplayer(self.key1, self.key2)
                 win.showMenu()
 
-
-
     def setOriginalValues(self):
-
-        with open("data.json") as json_file:
-            data = json.load(json_file)
 
         self.photo = ""
         self.music = ""
             
-        for usuario in data:
+        for usuario in self.data:
             if usuario["key"] == self.key:
                 self.entry_username.insert(0, usuario["username"])
                 self.entry_name.insert(0, usuario["full_name"])
@@ -237,26 +247,26 @@ class newUser:
         if not username or not password or not fullname or not email:
             messagebox.showwarning("Warning", "Please fill all the data to create your user")
             return
-        
-        if self.validateEmail(email) == False:
+
+        # Verificar las credenciales con los datos del archivo JSON
+        if(self.key == 0):
+            for usuario in self.data:
+                if usuario["username"] == username:
+                    messagebox.showwarning("Warning", "This username has already been registered")
+                    return
+                if usuario["email"] == email:
+                    messagebox.showwarning("Warning", "This email has already been registered")
+                    return
+            
+        if self.email != email:
             messagebox.showwarning("Error", "The email address entered is not valid, please try again")
             return
         
         if self.verify_password(password) == False:
             messagebox.showwarning("Error", "Password must have:\n- Minimum 7 characters\n- You must use at least one capital letter\n- You must use at least one special symbol\n- You must use at least one number\n- You must use at least one lowercase letter")
             return
-        
-        # Cargar datos de usuarios desde el archivo JSON
-        with open("data.json") as json_file:
-            data = json.load(json_file)
-
-        # Verificar las credenciales con los datos del archivo JSON
-        for usuario in data:
-            if usuario["username"] == username or  usuario["email"] == email:
-                messagebox.showwarning("Warning", "This user already exists")
-                return
-        
-        user = {"key": len(data)+1,
+          
+        user = {"key": len(self.data)+1,
             "username": username, 
             "password": password, 
             "full_name": fullname,
@@ -266,11 +276,17 @@ class newUser:
             "music": music}
         
         # Agregar el nuevo usuario a la lista de datos existentes
+        with open("data.json") as json_file:
+            data = json.load(json_file)
+
         data.append(user)
 
         # Escribir los datos actualizados en el archivo JSON
         with open("data.json", "w") as json_file:
             json.dump(data, json_file, indent=4)
+        
+        messagebox.showinfo("Info", "Your user has been registered")
+        self.goBack()
             
 
     def saveChanges(self):
@@ -279,6 +295,7 @@ class newUser:
         email = self.entry_email.get()
         ship = self.ship_images[self.current_index]
         password = self.entry_password.get()
+        code = self.entry_verify.get()
         
         if not self.filename:
             photo = self.photo #Si no ingresa un nuevo valor permanece el original
@@ -291,13 +308,17 @@ class newUser:
             music = self.music_file
 
         
-        if not username or not password or not fullname or not email:
+        if not username or not password or not fullname or not email or not code:
             messagebox.showwarning("Warning", "Please fill all the data to create your user")
             return
         
-        if self.validateEmail(email) == False:
+        if self.email == email:
             messagebox.showwarning("Error", "The email address entered is not valid, please try again")
             return
+        
+        if code != self.code:
+            messagebox.showerror("Error", "The code entered for email validation is incorrect")
+            return 
         
         if self.verify_password(password) == False:
             messagebox.showwarning("Error", "Password must have:\n- Minimum 7 characters\n- You must use at least one capital letter\n- You must use at least one special symbol\n- You must use at least one number\n- You must use at least one lowercase letter")
@@ -315,7 +336,7 @@ class newUser:
         with open("data.json") as json_file:
             data = json.load(json_file)
             
-        for usuario in data:
+        for usuario in self.data:
             if usuario["key"] == self.key:
                 usuario.update(user) 
 
@@ -340,17 +361,34 @@ class newUser:
 
         return True
     
+    def generate_code(self):
+        # Generar un código de 5 dígitos aleatorio
+        code = ''.join(random.choices('0123456789', k=5))
+        self.code = code
+        return code
     
-    def validateEmail(self, destination):
+    def validateEmail(self):
+        destination = self.entry_email.get()
+
+        if(self.key == 0):
+            for usuario in self.data:
+                if usuario["email"] == destination:
+                    messagebox.showwarning("Warning", "This email has already been registered")
+                    return
+                    
         try:
             # Inicializar Yagmail con tu dirección de correo electrónico y contraseña
             yag = yagmail.SMTP('galactatec@gmail.com', 'twklqtltylscbvnz')
 
             # Enviar el correo electrónico
-            yag.send(to=destination, subject='Welcome to GalactaTEC', contents='This email is a confirmation of your new user for GalactaTEC.')
+            yag.send(to=destination, subject='Welcome to GalactaTEC', contents='To validate your email adress for GalactaTEC please enter the code ' + self.generate_code() + ' when creating your user')
 
-            print("El correo electrónico fue enviado exitosamente.")
+            self.email = destination
+            print(self.email)
+
+            messagebox.showinfo("Info", "You have received a validation code")
             return True
+        
 
         except Exception as e:
             print("Error al enviar el correo electrónico:", e)

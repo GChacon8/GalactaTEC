@@ -12,7 +12,7 @@
     {
         "key": 2,
         "username": "vale",
-        "password": "Bbbbbb2@",
+        "password": "Ab1234!",
         "full_name": "Valeria Morales",
         "email": "valemorales07@estudiantec.cr",
         "photo": "Images/pp.png",
@@ -24,12 +24,34 @@
         "username": "giank",
         "password": "Ab1234!",
         "full_name": "Giancarlo",
-        "email": "valeriamorales40@gmail.com",
-        "photo": "C:/Users/valer/OneDrive/Documentos/GitHub/GalactaTEC/Images/pp2.png",
+        "email": "",
+        "photo": "Images/pp2.png",
+        "ship": "Images/ships/ship1.png",
+        "music": null,
+        "highscore": "0"
+    },
+    {
+        "key": 4,
+        "username": "lala",
+        "password": "Bbbbbb2@",
+        "full_name": "Daniel Castro",
+        "email": "dcastroeli3009@gmail.com",
+        "photo": "Images/pp2.png",
         "ship": "Images/ships/ship1.png",
         "music": [
-            "C:/Users/valer/OneDrive/Documentos/GitHub/GalactaTEC/Songs/Black Sabbath - Paranoid.mp3",
-            "C:/Users/valer/OneDrive/Documentos/GitHub/GalactaTEC/Songs/I Don't Care - VIRA.mp3"
-        ]
+            "D:/Tec/Cursos/Modelado/GalactaTEC/Songs/I Don't Care - VIRA.mp3"
+        ],
+        "highscore": "9000"
+    },
+    {
+        "key": 5,
+        "username": "val",
+        "password": "ABCdef5@",
+        "full_name": "Vale M",
+        "email": "valeriamorales40@gmail.com",
+        "photo": null,
+        "ship": "Images/ships/ship3.png",
+        "music": null,
+        "highscore": "0"
     }
 ]
