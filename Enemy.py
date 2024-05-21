@@ -12,7 +12,7 @@ class Enemy(Collidable):
     self.rect.y = posy
     self.pos = posx
 
-    self.active = True
+    self.active = True  #Para saber si está vivo o no
   
   #No la he usado aún, pero sirve para "teletransportarse"
   def move(self, x, y):
@@ -47,7 +47,7 @@ class Enemy(Collidable):
   
   def get_y_coords(self):
     return self.rect.y
-  
+
   def on_collision(self, other: Collidable):
     # print("Enemy collided with:", other)
     pass

@@ -188,7 +188,8 @@ class game:
       self.background = AnimatedBackground(position=(0, 0), images=self.images, delay=0.03)
       self.all_sprites = pygame.sprite.Group()
       self.all_sprites.add(self.background)
-
+      self.button_rect = pygame.Rect(775,525,25,25) #Posición del boton de ayuda
+      self.paused = False
       pygame.display.set_caption("GalactaTEC")
 
       if key2 == None:
@@ -204,7 +205,7 @@ class game:
             
       enemies = EnemyFactory.create_enemies(6, 6)
       self.inst_enemies = enemies[0]
-      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,2)#se elige el patron de vuelo
       
       
       self.bullets = []
@@ -245,6 +246,7 @@ class game:
   def run(self):
       clock = pygame.time.Clock()
       while self.running:
+         
           dt = clock.tick(game.FRAME_RATE)
           self.bonus_timer += dt
 
@@ -267,7 +269,11 @@ class game:
                     if bullet:
                         self.inst_entities.append(bullet)
                         self.collision_observer.register([bullet])
-
+              elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if self.button_rect.collidepoint(mouse_pos):
+                    print("¡El botón fue presionado!")
+                    
 
           self.all_sprites.update(dt)
 
@@ -278,8 +284,8 @@ class game:
 
           # Movimiento de enemigos
           if self.t == 60:
-            if self.movement:#elegir acá el patron de movimiento
-              self.inst_enemyMovement.pattern_1()
+            if self.movement:      
+              self.inst_enemyMovement.do_movement()
             if self.setup_counter<6:
               for i in self.inst_enemies:
                 for j in i:
@@ -353,6 +359,7 @@ class game:
              self.inst_ship.bonus_colleted.pop(0)
           else:
               active_bonuses.pop(0)
+  
   def draw_colleted_bonuses(self,font,text_color = (0, 255, 255) ):
     active_bonuses = self.inst_ship.bonus_colleted
     if active_bonuses:
@@ -447,6 +454,7 @@ class game:
       text_x = game.SCREEN_WIDTH // 2 - text_surface.get_width() // 2 - Bonus.WIDTH
       text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
       self.screen.blit(text_surface, (text_x, text_y))
+  
   def draw_next_bullet(self, font, text_color):
     next_bullet = self.inst_ship.bullet_types[0].value
     next_bullet_text = f"Next\nbullet:\n{next_bullet}"
@@ -470,6 +478,7 @@ class game:
     font_size = 11
     font = pygame.font.Font(font_path, font_size)
     text_color = (255, 255, 255)  # Blanco
+    pygame.draw.rect(self.screen, (255, 0, 0), self.button_rect) #Botón de ayuda
     pygame.draw.rect(self.screen, 
                     (128, 128, 128),
                     (0,
@@ -661,7 +670,8 @@ class BulletShip(Collidable):
     if isinstance(other, Enemy):
         self.kill()
         game.POINTS_TO_ADD += 200
-                
+
+             
 if __name__ == "__main__":
   inst_galacta = galacta()
 
