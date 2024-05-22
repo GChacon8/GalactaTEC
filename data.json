@@ -8,7 +8,8 @@
         "photo": "Images/spaceship.png",
         "ship": "Images/spaceship.png",
         "music": "",
-        "highscore": "1000"
+        "highscore": "1000",
+        "lives": 1
     },
     {
         "key": 2,
@@ -19,7 +20,8 @@
         "photo": "Images/pp.png",
         "ship": "Images/ships/ship4.png",
         "music": "",
-        "highscore": "2000"
+        "highscore": "2000",
+        "lives": 3
     },
     {
         "key": 3,
@@ -30,7 +32,8 @@
         "photo": "Images/pp2.png",
         "ship": "Images/ships/ship1.png",
         "music": null,
-        "highscore": "0"
+        "highscore": "3000",
+        "lives": 5
     },
     {
         "key": 4,
@@ -43,7 +46,8 @@
         "music": [
             "D:/Tec/Cursos/Modelado/GalactaTEC/Songs/I Don't Care - VIRA.mp3"
         ],
-        "highscore": "9000"
+        "highscore": "9000",
+        "lives": 4
     },
     {
         "key": 5,
@@ -54,6 +58,7 @@
         "photo": null,
         "ship": "Images/ships/ship3.png",
         "music": null,
-        "highscore": "0"
+        "highscore": "0",
+        "lives": 2
     }
 ]

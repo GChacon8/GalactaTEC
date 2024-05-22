@@ -2,6 +2,8 @@ import tkinter as tk
 import AnimatedGIF
 import GalactaTEC
 from GalactaTEC import game
+import pygame
+
 class init_menu:
   def __init__(self, window, animated_gif, key):
     self.key = key 
@@ -10,6 +12,9 @@ class init_menu:
     self.window = window
     self.animated_gif = animated_gif
 
+    pygame.mixer.init()
+    self.song = "Songs/Planet Caravan 8bit.mp3"
+
     self.window.title("GalactaTEC")
     self.window.configure(bg="#120043")
     self.window.geometry("800x600")
@@ -17,6 +22,8 @@ class init_menu:
     #Etiquetas y botones del menu principal
     self.etiqueta = tk.Label(self.window, text="¡GalactaTEC!", font=("Fixedsys", 30, "italic"), bg="#120043", fg="white")
     self.etiqueta.place(relx=0.5, rely=0.1, anchor="center") 
+
+    self.play_music()
 
   def showMenu(self):
     self.btnUserSettings = tk.Button(self.window, text="User Settings", font=("Fixedsys", 15), command=self.userSettings)
@@ -48,6 +55,7 @@ class init_menu:
       self.btnExit.place(relx=0.5, rely=0.8, anchor="center", width=230) 
 
       self.window.mainloop()
+      pygame.mixer.quit()
 
   def initPlayer2(self):
       self.clear_win()
@@ -122,4 +130,10 @@ class init_menu:
     else:
         inst_game = game(key1, key2)
         inst_game.run()
+
+      # Función para reproducir música
+  def play_music(self):
+    if self.song:
+        pygame.mixer.music.load(self.song)  
+        pygame.mixer.music.play(-1)  # Reproducir en bucle
     
