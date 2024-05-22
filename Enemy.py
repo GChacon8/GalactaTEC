@@ -10,6 +10,9 @@ class Enemy(Collidable):
     self.rect = self.image.get_rect()
     self.rect.x = posx
     self.rect.y = posy
+
+    #self.startx = posx
+    #self.starty = posy
     self.pos = posx
 
     self.active = True  #Para saber si está vivo o no
@@ -23,18 +26,18 @@ class Enemy(Collidable):
     self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
     self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
 
-  def move_rigth(self):
-     self.rect.x += 40
+  def move_rigth(self,num):
+     self.rect.x += num
   
-  def move_left(self):
-     self.rect.x -= 40
+  def move_left(self,num):
+     self.rect.x -= num
 
-  def move_down(self):
-    self.rect.y += 40
+  def move_down(self, num):
+    self.rect.y += num
     #print(max(0, min(self.rect.x, 800 - self.rect.width)))
-  
-  def move_up(self):
-     self.rect.y -= 40
+
+  def move_up(self,num):
+     self.rect.y -= num
 
   def draw(self, screen: pygame.Surface):
     if self.active:
@@ -44,11 +47,16 @@ class Enemy(Collidable):
 
   def get_x_coords(self):
     return self.rect.x
-  
+
   def get_y_coords(self):
     return self.rect.y
 
   def on_collision(self, other: Collidable):
     # print("Enemy collided with:", other)
     pass
- 
+   
+  def is_alive(self):
+    return self.active
+
+  def kill(self):
+    self.active = False

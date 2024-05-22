@@ -205,7 +205,7 @@ class game:
             
       enemies = EnemyFactory.create_enemies(6, 6)
       self.inst_enemies = enemies[0]
-      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,2)#se elige el patron de vuelo
+      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,3)#se elige el patron de vuelo
       
       
       self.bullets = []
@@ -283,20 +283,23 @@ class game:
 
 
           # Movimiento de enemigos
-          if self.t == 60:
-            if self.movement:      
-              self.inst_enemyMovement.do_movement()
+          
+         
+          if self.t >= 60:
+            #Para bajar las naves hacia la pantalla de inicio  
             if self.setup_counter<6:
               for i in self.inst_enemies:
                 for j in i:
-                  j.move_down()
+                  j.move_down(40)
             else:
               self.movement = True
-
             self.setup_counter+=1
             self.t=0
           else:
-            self.t+=2 #cambiar a +=1
+            self.t+=5 #para colocar las naves inicialmente poner en +=1
+          if self.movement:      
+            self.inst_enemyMovement.do_movement()
+
           keys = pygame.key.get_pressed()
           self.draw_and_update_all_entities(keys)
 
