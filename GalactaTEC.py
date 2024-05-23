@@ -312,8 +312,12 @@ class game:
           else:
             self.t+=2 #cambiar a +=1
           keys = pygame.key.get_pressed()
-          v_axis = joystick.get_axis(1)
-          h_axis = joystick.get_axis(0)
+          try:
+            v_axis = joystick.get_axis(1)
+            h_axis = joystick.get_axis(0)
+          except:
+            v_axis = 0
+            h_axis = 0
           self.draw_and_update_all_entities(keys, h_axis, v_axis)
 
           # Actualizar colisiones
