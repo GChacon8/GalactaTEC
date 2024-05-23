@@ -3,6 +3,7 @@ import pygame
 import tkinter as tk
 import itertools
 import os
+import sys
 import random
 import menu
 import login
@@ -169,9 +170,10 @@ class AnimatedBackground(pygame.sprite.Sprite):
           self.image = next(self.images)
 
 class game:
-    
-  SCREEN_WIDTH = 800
-  SCREEN_HEIGHT = 600
+  
+  pygame.init()
+  SCREEN_WIDTH = pygame.display.Info().current_w
+  SCREEN_HEIGHT = pygame.display.Info().current_h
   FRAME_RATE = 60
   BONUS_TIME = 3000
   BONUS_PROBABILITY = 0.5
@@ -179,16 +181,22 @@ class game:
   POINTS_TO_ADD = 0
 
   def __init__(self, key1, key2 = None):
-      pygame.init()
       self.width = game.SCREEN_WIDTH
       self.height = game.SCREEN_HEIGHT
       self.screen = pygame.display.set_mode((self.width, self.height))
 
-      self.images = [pygame.image.load('background_frames' + os.sep + file_name).convert() for file_name in sorted(os.listdir('background_frames'))]
+      #self.images = [pygame.image.load('background_frames_1920x1080' + os.sep + file_name).convert() for file_name in sorted(os.listdir('background_frames'))]
+      self.images = [
+            pygame.transform.scale(
+                pygame.image.load('background_frames' + os.sep + file_name).convert(), 
+                (self.width, self.height)
+            ) 
+            for file_name in sorted(os.listdir('background_frames'))
+        ]
       self.background = AnimatedBackground(position=(0, 0), images=self.images, delay=0.03)
       self.all_sprites = pygame.sprite.Group()
       self.all_sprites.add(self.background)
-      self.button_rect = pygame.Rect(775,525,25,25) #Posición del boton de ayuda
+      self.button_rect = pygame.Rect(self.width-75,self.height-75,25,25) #Posición del boton de ayuda
       self.paused = False
       pygame.display.set_caption("GalactaTEC")
 
@@ -205,7 +213,7 @@ class game:
             
       enemies = EnemyFactory.create_enemies(6, 6)
       self.inst_enemies = enemies[0]
-      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,3)#se elige el patron de vuelo
+      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,1)#se elige el patron de vuelo
       
       
       self.bullets = []

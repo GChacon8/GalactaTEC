@@ -5,6 +5,7 @@ class EnemyMovement:
         self.moving_rigth = True
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
+        print("EL TAMAÑO DE LA PANTALLA ES:", self.screenWidth, "x", self.screenHeight)
         self.Patter_X_Bools = [True,False,True,False,True,False]
         self.contador = 0
         self.changing = True
