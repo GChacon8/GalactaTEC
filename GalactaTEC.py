@@ -79,20 +79,20 @@ class Ship (Collidable):
     self.sound_bullet.set_volume(0.05)
 
 
-  def update(self, keys):
+  def update(self, keys, h_axis, v_axis):
     if self.invulnerable_time > 0:
       self.invulnerable_time -= 1
 
-    if keys[pygame.K_LEFT]:
+    if keys[pygame.K_LEFT] or h_axis<-0.5:
       self.rect.x -= self.speed
       self.moving_sound.play()
-    if keys[pygame.K_RIGHT]:
+    if keys[pygame.K_RIGHT] or h_axis>0.5:
       self.rect.x += self.speed
       self.moving_sound.play()
-    if keys[pygame.K_UP]:
+    if keys[pygame.K_UP] or v_axis<-0.5:
       self.rect.y -= self.speed
       self.moving_sound.play()
-    if keys[pygame.K_DOWN]:
+    if keys[pygame.K_DOWN] or v_axis>0.5:
       self.rect.y += self.speed
       self.moving_sound.play()
     # Limitar la nave dentro de los límites de la pantalla
@@ -243,6 +243,17 @@ class game:
       self.gameMusic.play()
 
   def run(self):
+    # Inicializa los joysticks
+      pygame.joystick.init()
+
+    # Verifica cuántos joysticks están conectados
+      joystick_count = pygame.joystick.get_count()
+      print(f"Number of joysticks: {joystick_count}")
+
+      if joystick_count > 0:
+        joystick = pygame.joystick.Joystick(0)
+        joystick.init()
+        print(f"Joystick name: {joystick.get_name()}")
       clock = pygame.time.Clock()
       while self.running:
           dt = clock.tick(game.FRAME_RATE)
@@ -267,14 +278,23 @@ class game:
                     if bullet:
                         self.inst_entities.append(bullet)
                         self.collision_observer.register([bullet])
-
+              elif event.type == pygame.JOYBUTTONDOWN:
+                if event.button == 3:
+                  self.change_bonus()
+                elif event.button == 1:
+                   self.use_bonus()
+              elif event.type == pygame.JOYAXISMOTION:
+                if event.axis==5 and event.value==1.0:
+                  bullet = self.inst_ship.shoot()
+                  if bullet:
+                    self.inst_entities.append(bullet)
+                    self.collision_observer.register([bullet])
 
           self.all_sprites.update(dt)
 
           # Dibujar fondo
           self.screen.blit(self.background.image, self.background.rect)
           self.all_sprites.draw(self.screen)
-
 
           # Movimiento de enemigos
           if self.t == 60:
@@ -292,7 +312,13 @@ class game:
           else:
             self.t+=2 #cambiar a +=1
           keys = pygame.key.get_pressed()
-          self.draw_and_update_all_entities(keys)
+          try:
+            v_axis = joystick.get_axis(1)
+            h_axis = joystick.get_axis(0)
+          except:
+            v_axis = 0
+            h_axis = 0
+          self.draw_and_update_all_entities(keys, h_axis, v_axis)
 
           # Actualizar colisiones
           self.collision_observer.update()
@@ -485,10 +511,10 @@ class game:
     self.draw_points(font, text_color)
     self.draw_next_bullet(font, text_color)
 
-  def draw_and_update_all_entities(self, keys):
+  def draw_and_update_all_entities(self, keys, h_axis, v_axis):
     for entity in self.inst_entities:
       if isinstance(entity, Ship):
-        entity.update(keys)
+        entity.update(keys, h_axis, v_axis)
       elif isinstance(entity, Bonus):
         entity.update()
       elif isinstance(entity, Shield):
@@ -661,7 +687,7 @@ class BulletShip(Collidable):
     if isinstance(other, Enemy):
         self.kill()
         game.POINTS_TO_ADD += 200
-                
+
 if __name__ == "__main__":
   inst_galacta = galacta()
 
