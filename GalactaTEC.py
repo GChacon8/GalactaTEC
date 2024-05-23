@@ -3,6 +3,7 @@ import pygame
 import tkinter as tk
 import itertools
 import os
+import sys
 import random
 import menu
 import login
@@ -169,9 +170,10 @@ class AnimatedBackground(pygame.sprite.Sprite):
           self.image = next(self.images)
 
 class game:
-    
-  SCREEN_WIDTH = 800
-  SCREEN_HEIGHT = 600
+  
+  pygame.init()
+  SCREEN_WIDTH = pygame.display.Info().current_w
+  SCREEN_HEIGHT = pygame.display.Info().current_h
   FRAME_RATE = 60
   BONUS_TIME = 3000
   BONUS_PROBABILITY = 0.5
@@ -179,16 +181,23 @@ class game:
   POINTS_TO_ADD = 0
 
   def __init__(self, key1, key2 = None):
-      pygame.init()
       self.width = game.SCREEN_WIDTH
       self.height = game.SCREEN_HEIGHT
       self.screen = pygame.display.set_mode((self.width, self.height))
 
-      self.images = [pygame.image.load('background_frames' + os.sep + file_name).convert() for file_name in sorted(os.listdir('background_frames'))]
+      #self.images = [pygame.image.load('background_frames_1920x1080' + os.sep + file_name).convert() for file_name in sorted(os.listdir('background_frames'))]
+      self.images = [
+            pygame.transform.scale(
+                pygame.image.load('background_frames' + os.sep + file_name).convert(), 
+                (self.width, self.height)
+            ) 
+            for file_name in sorted(os.listdir('background_frames'))
+        ]
       self.background = AnimatedBackground(position=(0, 0), images=self.images, delay=0.03)
       self.all_sprites = pygame.sprite.Group()
       self.all_sprites.add(self.background)
-
+      self.button_rect = pygame.Rect(self.width-75,self.height-75,25,25) #Posición del boton de ayuda
+      self.paused = False
       pygame.display.set_caption("GalactaTEC")
 
       if key2 == None:
@@ -204,7 +213,7 @@ class game:
             
       enemies = EnemyFactory.create_enemies(6, 6)
       self.inst_enemies = enemies[0]
-      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT)
+      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,1)#se elige el patron de vuelo
       
       
       self.bullets = []
@@ -256,6 +265,7 @@ class game:
         print(f"Joystick name: {joystick.get_name()}")
       clock = pygame.time.Clock()
       while self.running:
+         
           dt = clock.tick(game.FRAME_RATE)
           self.bonus_timer += dt
 
@@ -278,6 +288,12 @@ class game:
                     if bullet:
                         self.inst_entities.append(bullet)
                         self.collision_observer.register([bullet])
+
+              elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if self.button_rect.collidepoint(mouse_pos):
+                    print("¡El botón fue presionado!")
+                    
               elif event.type == pygame.JOYBUTTONDOWN:
                 if event.button == 3:
                   self.change_bonus()
@@ -297,20 +313,23 @@ class game:
           self.all_sprites.draw(self.screen)
 
           # Movimiento de enemigos
-          if self.t == 60:
-            if self.movement:#elegir acá el patron de movimiento
-              self.inst_enemyMovement.pattern_1()
+          
+         
+          if self.t >= 60:
+            #Para bajar las naves hacia la pantalla de inicio  
             if self.setup_counter<6:
               for i in self.inst_enemies:
                 for j in i:
-                  j.move_down()
+                  j.move_down(40)
             else:
               self.movement = True
-
             self.setup_counter+=1
             self.t=0
           else:
-            self.t+=2 #cambiar a +=1
+            self.t+=5 #para colocar las naves inicialmente poner en +=1
+          if self.movement:      
+            self.inst_enemyMovement.do_movement()
+
           keys = pygame.key.get_pressed()
           try:
             v_axis = joystick.get_axis(1)
@@ -379,6 +398,7 @@ class game:
              self.inst_ship.bonus_colleted.pop(0)
           else:
               active_bonuses.pop(0)
+  
   def draw_colleted_bonuses(self,font,text_color = (0, 255, 255) ):
     active_bonuses = self.inst_ship.bonus_colleted
     if active_bonuses:
@@ -473,6 +493,7 @@ class game:
       text_x = game.SCREEN_WIDTH // 2 - text_surface.get_width() // 2 - Bonus.WIDTH
       text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
       self.screen.blit(text_surface, (text_x, text_y))
+  
   def draw_next_bullet(self, font, text_color):
     next_bullet = self.inst_ship.bullet_types[0].value
     next_bullet_text = f"Next\nbullet:\n{next_bullet}"
@@ -496,6 +517,7 @@ class game:
     font_size = 11
     font = pygame.font.Font(font_path, font_size)
     text_color = (255, 255, 255)  # Blanco
+    pygame.draw.rect(self.screen, (255, 0, 0), self.button_rect) #Botón de ayuda
     pygame.draw.rect(self.screen, 
                     (128, 128, 128),
                     (0,
