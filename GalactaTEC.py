@@ -151,7 +151,6 @@ class Ship (Collidable):
       self.sound_bullet.play()
     return bullet
 
-
 class AnimatedBackground(pygame.sprite.Sprite):
   def __init__(self, position, images, delay):
       super(AnimatedBackground, self).__init__()
@@ -184,8 +183,6 @@ class game:
       self.width = game.SCREEN_WIDTH
       self.height = game.SCREEN_HEIGHT
       self.screen = pygame.display.set_mode((self.width, self.height))
-
-      #self.images = [pygame.image.load('background_frames_1920x1080' + os.sep + file_name).convert() for file_name in sorted(os.listdir('background_frames'))]
       self.images = [
             pygame.transform.scale(
                 pygame.image.load('background_frames' + os.sep + file_name).convert(), 
@@ -196,19 +193,13 @@ class game:
       self.background = AnimatedBackground(position=(0, 0), images=self.images, delay=0.03)
       self.all_sprites = pygame.sprite.Group()
       self.all_sprites.add(self.background)
-      self.button_rect = pygame.Rect(self.width-75,self.height-75,25,25) #Posición del boton de ayuda
+      self.button_rect = pygame.Rect(self.width-75,self.height-75,25,25) #Posición del boton de ayuda COLOCAR EN LA BARRA DE JUEGO
       self.paused = False
       pygame.display.set_caption("GalactaTEC")
 
-      if key2 == None:
-        self.inst_ship = Ship(key1, 1)
-      else:
-        ran = random.randint(1,2)
-        if ran ==1:
-          self.inst_ship = Ship(key1, 1)
-        else:
-          self.inst_ship = Ship(key2, 2)
-           
+      self.key1 = key1
+      self.key2 = key2
+      self.inst_ship = self.startingPlayer()           
             
       factory = EnemyFactory(self.SCREEN_WIDTH)
       enemies = factory.create_enemies(6, 6)
@@ -237,7 +228,6 @@ class game:
 
       # Sounds
       volume = 0.005
-
       self.gameMusic = pygame.mixer.Sound("Songs/Spectre Music.mp3")
       self.gameMusic.set_volume(0.5)
 
@@ -251,117 +241,128 @@ class game:
       self.sound_bonus_shield.set_volume(volume)
 
       self.gameMusic.play()
+      #argumentos para el control
+      self.joystick = None
+      self.v_axis = 0
+      self.h_axis = 0
 
   def run(self):
-    # Inicializa los joysticks
-      pygame.joystick.init()
-
-    # Verifica cuántos joysticks están conectados
-      joystick_count = pygame.joystick.get_count()
-      print(f"Number of joysticks: {joystick_count}")
-
-      if joystick_count > 0:
-        joystick = pygame.joystick.Joystick(0)
-        joystick.init()
-        print(f"Joystick name: {joystick.get_name()}")
+      self.joystick_init()
       clock = pygame.time.Clock()
       while self.running:
           dt = clock.tick(game.FRAME_RATE)
           self.bonus_timer += dt
 
-          if self.paused:  
-            for event in pygame.event.get():
-              if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if self.button_rect.collidepoint(mouse_pos):
-                    self.paused = False
-                    print("¡El botón fue presionado quitar pausa!")
-            self.draw_menu_game()
-            pygame.display.flip()
-          else:
-             # Generar bonos de forma aleatoria
-            if self.bonus_timer >= self.bonus_interval:
-              self.bonus_timer = 0
-              self.generate_bonus()
-          # Manejo de eventos
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_m:
-                        self.change_bonus()
-                    elif event.key == pygame.K_p:
-                        self.use_bonus()
-                    elif event.key == pygame.K_SPACE:
-                      bullet = self.inst_ship.shoot()
-                      if bullet:
-                          self.inst_entities.append(bullet)
-                          self.collision_observer.register([bullet])
-
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                  mouse_pos = pygame.mouse.get_pos()
-                  if self.button_rect.collidepoint(mouse_pos):
-                      print("¡El botón fue presionado PONER PAUSA!")
-                      self.paused = True
-                      #pygame.display.iconify()  #Función de pygame para minimizar la ventana
-                      
-                elif event.type == pygame.JOYBUTTONDOWN:
-                  if event.button == 3:
-                    self.change_bonus()
-                  elif event.button == 1:
-                    self.use_bonus()
-                elif event.type == pygame.JOYAXISMOTION:
-                  if event.axis==5 and event.value==1.0:
-                    bullet = self.inst_ship.shoot()
-                    if bullet:
-                      self.inst_entities.append(bullet)
-                      self.collision_observer.register([bullet])
-
-            self.all_sprites.update(dt)
-
-            # Dibujar fondo
-            self.screen.blit(self.background.image, self.background.rect)
-            self.all_sprites.draw(self.screen)
-
-            # Movimiento de enemigos
-            
-          
-            if self.t >= 60:
-              #Para bajar las naves hacia la pantalla de inicio  
-              if self.setup_counter<6:
-                for i in self.inst_enemies:
-                  for j in i:
-                    j.move_down(40)
-              else:
-                self.movement = True
-              self.setup_counter+=1
-              self.t=0
-            else:
-              self.t+=5 #para colocar las naves inicialmente poner en +=1
-            if self.movement:      
-              self.inst_enemyMovement.do_movement()
-
+          if self.paused:  #Juego en Pausa
+            self.paused_events()                #Manejar evento de poner o quitar pausa
+            self.draw_menu_game()               #Dibujar el menú
+            pygame.display.flip()       
+          else: #Jugando Ando
+            self.generate_bonus()               #Generar bonos de forma aleatoria
+            self.game_events()                  #Manejo de eventos del juego, incluir
+            self.all_sprites.update(dt)         #Update del fondo 
+            self.screen.blit(self.background.image, self.background.rect)     #Dibujar fondo
+            self.all_sprites.draw(self.screen)                                
+            self.mover_enemigos()               #Movimiento de enemigos
             keys = pygame.key.get_pressed()
-            try:
-              v_axis = joystick.get_axis(1)
-              h_axis = joystick.get_axis(0)
-            except:
-              v_axis = 0
-              h_axis = 0
-            self.draw_and_update_all_entities(keys, h_axis, v_axis)
-
-            # Actualizar colisiones
-            self.collision_observer.update()
-
+            self.controlconection()             #Conexión con el control
+            self.draw_and_update_all_entities(keys, self.h_axis, self.v_axis) #Dibujar todas las entidades
+            self.collision_observer.update()    #Actualizar colisiones
             if game.POINTS_TO_ADD > 0:
               self.inst_ship.add_points(game.POINTS_TO_ADD)
               game.POINTS_TO_ADD = 0
-
-            
             pygame.display.flip()
             self.check_killed()
 
+
+  #Setup de los joysticks
+  def joystick_init(self):
+     # Inicializa los joysticks
+    pygame.joystick.init()
+    # Verifica cuántos joysticks están conectados
+    joystick_count = pygame.joystick.get_count()
+    if joystick_count > 0:
+      self.joystick = pygame.joystick.Joystick(0)
+      self.joystick.init()
+      #print(f"Joystick name: {self.joystick.get_name()}")
+  #Permitir quitar por medio del botón
+  def paused_events(self):
+    for event in pygame.event.get():
+      if event.type == pygame.MOUSEBUTTONDOWN:
+        mouse_pos = pygame.mouse.get_pos()
+        if self.button_rect.collidepoint(mouse_pos):
+          self.paused = False
+  #Intentar la conexion con el control
+  def controlconection(self):
+    try:
+      self.v_axis = self.joystick.get_axis(1)
+      self.h_axis = self.joystick.get_axis(0)
+    except:
+      self.v_axis = 0
+      self.h_axis = 0
+  #seleccionar que jugador comienza el juego
+  def startingPlayer(self):
+    if self.key2 == None:
+      return Ship(self.key1, 1)
+    else:
+      ran = random.randint(1,2)
+      if ran ==1:
+        return Ship(self.key1, 1)
+      else:
+        return Ship(self.key2, 2)
+  #Revisar los eventos del juego
+  def game_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    self.change_bonus()
+                elif event.key == pygame.K_p:
+                    self.use_bonus()
+                elif event.key == pygame.K_SPACE:
+                    bullet = self.inst_ship.shoot()
+                    if bullet:
+                        self.inst_entities.append(bullet)
+                        self.collision_observer.register([bullet])
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if self.button_rect.collidepoint(mouse_pos):
+                    self.paused = True
+                    #pygame.display.iconify()  # Función de pygame para minimizar la ventana
+            elif event.type == pygame.JOYBUTTONDOWN:
+                if event.button == 3:
+                    self.change_bonus()
+                elif event.button == 1:
+                    self.use_bonus()
+            elif event.type == pygame.JOYAXISMOTION:
+                if event.axis == 5 and event.value == 1.0:
+                    bullet = self.inst_ship.shoot()
+                    if bullet:
+                        self.inst_entities.append(bullet)
+                        self.collision_observer.register([bullet])
+  #Mover a los enemigos
+  def mover_enemigos(self): 
+    if self.t >= 60:
+      #Para bajar las naves hacia la pantalla de inicio  
+      if self.setup_counter<6:
+        for i in self.inst_enemies:
+          for j in i:
+            j.move_down(40)
+      else:
+        self.movement = True
+      self.setup_counter+=1
+      self.t=0
+    else:
+      self.t+=5 #para colocar las naves inicialmente poner en +=1
+    if self.movement:      
+      self.inst_enemyMovement.do_movement()
+  #Creación del bonus aleatorio
   def generate_bonus(self):
+    if self.bonus_timer >= self.bonus_interval:
+      self.bonus_timer = 0
+      self.generate_bonus_aux()
+  def generate_bonus_aux(self):
       if random.random() < game.BONUS_PROBABILITY:  # 50% chance
           if len(self.available_bonus_types) == 0:
               bonuses = self.inst_ship.bonus_colleted
@@ -376,12 +377,12 @@ class game:
           new_bonus = Bonus(x_position, 0, bonus_type)
           self.inst_entities.append(new_bonus)
           self.collision_observer.register([new_bonus])
-
+  #Cambiar el bonus por seleccionar
   def change_bonus(self):
       active_bonuses = self.inst_ship.bonus_colleted
       if active_bonuses:
           active_bonuses.append(active_bonuses.pop(0))
-
+  #Usar bonus seleccionado
   def use_bonus(self):
       active_bonuses = self.inst_ship.bonus_colleted
       if active_bonuses:
@@ -409,7 +410,7 @@ class game:
              self.inst_ship.bonus_colleted.pop(0)
           else:
               active_bonuses.pop(0)
-  
+  #Dibujar los bonuses
   def draw_colleted_bonuses(self,font,text_color = (0, 255, 255) ):
     active_bonuses = self.inst_ship.bonus_colleted
     if active_bonuses:
@@ -452,7 +453,7 @@ class game:
                                   game.SCREEN_WIDTH - 2*Bonus.WIDTH, 
                                   game.SCREEN_HEIGHT - Bonus.WIDTH,
                                   game.SCREEN_WIDTH, font, text_color)
-
+  #Dibujar las vidas
   def draw_lives(self, font, text_color):
     lives_text = f"{self.inst_ship.life}x"
     text_surface = font.render(lives_text, True, text_color)
@@ -466,7 +467,7 @@ class game:
 
     self.screen.blit(text_surface, (text_x, text_y))
     self.screen.blit(ship_image, (ship_x, ship_y))
-
+  #Dibujar el nivel actual
   def draw_level(self, font, text_color):
     level_text = f"Level: {0}"
     text_surface = font.render(level_text, True, text_color)
@@ -474,15 +475,15 @@ class game:
     text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
 
     self.screen.blit(text_surface, (text_x, text_y))
-
+  #Dibujar el tiempo
   def draw_time(self, font, text_color):
-    time_text = f"Time: {pygame.time.get_ticks() // 1000}"
-    text_surface = font.render(time_text, True, text_color)
-    text_x = game.SCREEN_WIDTH - int(game.SCREEN_WIDTH * (1-0.25))
-    text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
-
-    self.screen.blit(text_surface, (text_x, text_y))
-
+    if not self.paused:
+      time_text = f"Time: {pygame.time.get_ticks() // 1000}"
+      text_surface = font.render(time_text, True, text_color)
+      text_x = game.SCREEN_WIDTH - int(game.SCREEN_WIDTH * (1-0.25))
+      text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
+      self.screen.blit(text_surface, (text_x, text_y))
+  #Dibujar los puntos
   def draw_points(self, font, text_color):
     if self.inst_ship.points_multiplier != 1:
       points_text = f"Points: {self.inst_ship.points}\nNext are x({self.inst_ship.points_multiplier})"
@@ -504,7 +505,7 @@ class game:
       text_x = game.SCREEN_WIDTH // 2 - text_surface.get_width() // 2 - Bonus.WIDTH
       text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
       self.screen.blit(text_surface, (text_x, text_y))
-  
+  #Dibujar las balas
   def draw_next_bullet(self, font, text_color):
     next_bullet = self.inst_ship.bullet_types[0].value
     next_bullet_text = f"Next\nbullet:\n{next_bullet}"
@@ -522,7 +523,7 @@ class game:
     for surface in text_surfaces:
       self.screen.blit(surface, (text_x, text_y))
       text_y += surface.get_height()
-          
+  #Dibujar el menu de juego
   def draw_menu_game(self):
     font_path = "fonts/GenericTechno.otf"
     font_size = 11
@@ -543,7 +544,7 @@ class game:
     self.draw_time(font, text_color)
     self.draw_points(font, text_color)
     self.draw_next_bullet(font, text_color)
-
+  #Dibujar y actualizar todas las entidades actuales
   def draw_and_update_all_entities(self, keys, h_axis, v_axis):
     for entity in self.inst_entities:
       if isinstance(entity, Ship):
@@ -556,7 +557,7 @@ class game:
         entity.update()
       entity.draw(self.screen)
     self.draw_menu_game()
-
+  #Revisar colisiones
   def check_killed(self):
       for entity in self.inst_entities:
         if not entity.get_isAlive():
@@ -565,7 +566,7 @@ class game:
             self.inst_enemies.remove(entity)
           elif isinstance(entity, Ship):
             self.quit()
-
+  #Dibujar texto multilinea
   def draw_text_multiline(surface, text, x_0, y_0, max_x, font, color):
     words = text.split()
     lines = []
@@ -591,7 +592,7 @@ class game:
         text_surface = font.render(line, True, color)
         surface.blit(text_surface, (x_0, y))
         y += font.get_height()
-
+  #Salir
   def quit(self):
       self.running = False
       print("Thanks for playing!")
