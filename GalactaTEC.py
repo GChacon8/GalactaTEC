@@ -233,6 +233,7 @@ class game:
       self.t = 0
       self.running = True
       self.movement = False
+      self.paused = False
 
       # Sounds
       volume = 0.005
@@ -265,90 +266,100 @@ class game:
         print(f"Joystick name: {joystick.get_name()}")
       clock = pygame.time.Clock()
       while self.running:
-         
           dt = clock.tick(game.FRAME_RATE)
           self.bonus_timer += dt
 
-          # Generar bonos de forma aleatoria
-          if self.bonus_timer >= self.bonus_interval:
-              self.bonus_timer = 0
-              self.generate_bonus()
-
-          # Manejo de eventos
-          for event in pygame.event.get():
-              if event.type == pygame.QUIT:
-                  self.running = False
-              elif event.type == pygame.KEYDOWN:
-                  if event.key == pygame.K_m:
-                      self.change_bonus()
-                  elif event.key == pygame.K_p:
-                      self.use_bonus()
-                  elif event.key == pygame.K_SPACE:
-                    bullet = self.inst_ship.shoot()
-                    if bullet:
-                        self.inst_entities.append(bullet)
-                        self.collision_observer.register([bullet])
-
-              elif event.type == pygame.MOUSEBUTTONDOWN:
+          if self.paused:  
+            for event in pygame.event.get():
+              if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.button_rect.collidepoint(mouse_pos):
-                    print("¡El botón fue presionado!")
-                    
-              elif event.type == pygame.JOYBUTTONDOWN:
-                if event.button == 3:
-                  self.change_bonus()
-                elif event.button == 1:
-                   self.use_bonus()
-              elif event.type == pygame.JOYAXISMOTION:
-                if event.axis==5 and event.value==1.0:
-                  bullet = self.inst_ship.shoot()
-                  if bullet:
-                    self.inst_entities.append(bullet)
-                    self.collision_observer.register([bullet])
-
-          self.all_sprites.update(dt)
-
-          # Dibujar fondo
-          self.screen.blit(self.background.image, self.background.rect)
-          self.all_sprites.draw(self.screen)
-
-          # Movimiento de enemigos
-          
-         
-          if self.t >= 60:
-            #Para bajar las naves hacia la pantalla de inicio  
-            if self.setup_counter<6:
-              for i in self.inst_enemies:
-                for j in i:
-                  j.move_down(40)
-            else:
-              self.movement = True
-            self.setup_counter+=1
-            self.t=0
+                    self.paused = False
+                    print("¡El botón fue presionado quitar pausa!")
+            self.draw_menu_game()
+            pygame.display.flip()
           else:
-            self.t+=5 #para colocar las naves inicialmente poner en +=1
-          if self.movement:      
-            self.inst_enemyMovement.do_movement()
+             # Generar bonos de forma aleatoria
+            if self.bonus_timer >= self.bonus_interval:
+              self.bonus_timer = 0
+              self.generate_bonus()
+          # Manejo de eventos
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_m:
+                        self.change_bonus()
+                    elif event.key == pygame.K_p:
+                        self.use_bonus()
+                    elif event.key == pygame.K_SPACE:
+                      bullet = self.inst_ship.shoot()
+                      if bullet:
+                          self.inst_entities.append(bullet)
+                          self.collision_observer.register([bullet])
 
-          keys = pygame.key.get_pressed()
-          try:
-            v_axis = joystick.get_axis(1)
-            h_axis = joystick.get_axis(0)
-          except:
-            v_axis = 0
-            h_axis = 0
-          self.draw_and_update_all_entities(keys, h_axis, v_axis)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                  mouse_pos = pygame.mouse.get_pos()
+                  if self.button_rect.collidepoint(mouse_pos):
+                      print("¡El botón fue presionado PONER PAUSA!")
+                      self.paused = True
+                      #pygame.display.iconify()  #Función de pygame para minimizar la ventana
+                      
+                elif event.type == pygame.JOYBUTTONDOWN:
+                  if event.button == 3:
+                    self.change_bonus()
+                  elif event.button == 1:
+                    self.use_bonus()
+                elif event.type == pygame.JOYAXISMOTION:
+                  if event.axis==5 and event.value==1.0:
+                    bullet = self.inst_ship.shoot()
+                    if bullet:
+                      self.inst_entities.append(bullet)
+                      self.collision_observer.register([bullet])
 
-          # Actualizar colisiones
-          self.collision_observer.update()
+            self.all_sprites.update(dt)
 
-          if game.POINTS_TO_ADD > 0:
-             self.inst_ship.add_points(game.POINTS_TO_ADD)
-             game.POINTS_TO_ADD = 0
+            # Dibujar fondo
+            self.screen.blit(self.background.image, self.background.rect)
+            self.all_sprites.draw(self.screen)
 
-          pygame.display.flip()
+            # Movimiento de enemigos
+            
+          
+            if self.t >= 60:
+              #Para bajar las naves hacia la pantalla de inicio  
+              if self.setup_counter<6:
+                for i in self.inst_enemies:
+                  for j in i:
+                    j.move_down(40)
+              else:
+                self.movement = True
+              self.setup_counter+=1
+              self.t=0
+            else:
+              self.t+=5 #para colocar las naves inicialmente poner en +=1
+            if self.movement:      
+              self.inst_enemyMovement.do_movement()
 
-          self.check_killed()
+            keys = pygame.key.get_pressed()
+            try:
+              v_axis = joystick.get_axis(1)
+              h_axis = joystick.get_axis(0)
+            except:
+              v_axis = 0
+              h_axis = 0
+            self.draw_and_update_all_entities(keys, h_axis, v_axis)
+
+            # Actualizar colisiones
+            self.collision_observer.update()
+
+            if game.POINTS_TO_ADD > 0:
+              self.inst_ship.add_points(game.POINTS_TO_ADD)
+              game.POINTS_TO_ADD = 0
+
+            
+            pygame.display.flip()
+            self.check_killed()
 
   def generate_bonus(self):
       if random.random() < game.BONUS_PROBABILITY:  # 50% chance
