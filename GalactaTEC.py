@@ -210,10 +210,10 @@ class game:
           self.inst_ship = Ship(key2, 2)
            
             
-            
-      enemies = EnemyFactory.create_enemies(6, 6)
+      factory = EnemyFactory(self.SCREEN_WIDTH)
+      enemies = factory.create_enemies(6, 6)
       self.inst_enemies = enemies[0]
-      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,1)#se elige el patron de vuelo
+      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,3)#se elige el patron de vuelo
       
       
       self.bullets = []

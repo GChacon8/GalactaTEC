@@ -3,28 +3,26 @@ from Enemy import Enemy
 
 
 class EnemyFactory:
+    def __init__(self, screenWidth):
+        self.screenWidth = screenWidth
+        self.startx = screenWidth
+        self.starty = -240
 
-    @staticmethod
-    def create_enemies(row:int,col:int) -> tuple[list[list[Enemy]],list[Enemy]]:
+    def create_enemies(self,row:int,col:int) -> tuple[list[list[Enemy]],list[Enemy]]:
         enemies=[]
         enemies_aux=[]
         enemies_list:list[Enemy]=[]
 
-        startx=0
-        starty=-240
-        #(400-35) centro
-
-
         for i in range(row):
-            startx = (row-col)*45 + 140
+            self.startx = (self.screenWidth - (col * 90 - 45)) // 2
             for j in range(col):
-                enemies_aux.append(Enemy(startx, starty))
-                startx+=90
+                enemies_aux.append(Enemy(self.startx, self.starty))
+                self.startx+=90
 
             enemies.append(enemies_aux)
             enemies_list.extend(enemies_aux)
             enemies_aux=[]
             col-=1
-            startx=0
-            starty+=40
+            self.startx=0
+            self.starty+=40
         return (enemies,enemies_list)
