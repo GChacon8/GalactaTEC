@@ -28,10 +28,6 @@ class Ship (Collidable):
 
   def __init__(self, player, numPlayer):
     super().__init__()
-
-    print("Empieza a jugar el jugador:")
-    print(numPlayer)
-
     with open('data.json', 'r') as file:
     # Cargar el JSON desde el archivo
       data = json.load(file)
@@ -79,7 +75,6 @@ class Ship (Collidable):
     self.sound_bullet = pygame.mixer.Sound("sounds/bullet.wav")
     self.sound_bullet.set_volume(0.05)
 
-
   def update(self, keys, h_axis, v_axis):
     if self.invulnerable_time > 0:
       self.invulnerable_time -= 1
@@ -99,8 +94,6 @@ class Ship (Collidable):
     # Limitar la nave dentro de los límites de la pantalla
     self.rect.x = max(0, min(self.rect.x, game.SCREEN_WIDTH - self.rect.width))
     self.rect.y = max(0, min(self.rect.y, game.SCREEN_HEIGHT - self.rect.height-50))
-
-
   def draw(self, screen: pygame.Surface):
       if self.active:
           if self.invulnerable_time > 0:
@@ -111,7 +104,6 @@ class Ship (Collidable):
               screen.blit(ship_image, self.rect)
           else:
               screen.blit(self.image, self.rect)
-
   def on_collision(self, other: Collidable):
     if isinstance(other, Bonus):
         self.bonus_colleted.append(other)
@@ -131,13 +123,10 @@ class Ship (Collidable):
     self.points += points * self.points_multiplier
     if self.points_multiplier != 1:
       self.points_multiplier = 1
-
   def bonus_colleted(self):
     return self.bonus_colleted
-
   def desactive(self):
-    self.active = False
-  
+    self.active = False 
   def shoot(self):
     bullet_type = self.bullet_types[0]  # Obtiene el primer tipo de bala de la lista
     bullet = BulletShip(self, bullet_type)
@@ -199,7 +188,9 @@ class game:
 
       self.key1 = key1
       self.key2 = key2
-      self.inst_ship = self.startingPlayer()           
+      self.inst_ship = None
+      self.turno = 0
+      self.startingPlayer()         
             
       factory = EnemyFactory(self.SCREEN_WIDTH)
       enemies = factory.create_enemies(6, 6)
@@ -246,6 +237,16 @@ class game:
       self.v_axis = 0
       self.h_axis = 0
 
+      #Variables para multijugador
+      self.player_1_Status = []
+      
+      self.player_2_Status = []
+      self.setup_player2()
+      
+
+
+      
+
   def run(self):
       self.joystick_init()
       clock = pygame.time.Clock()
@@ -273,6 +274,45 @@ class game:
               game.POINTS_TO_ADD = 0
             pygame.display.flip()
             self.check_killed()
+  
+  def setup_player2(self):
+      #No solo cambiar qué nave se utiliza, sino también la música y todas esas cosas
+      try:
+          if self.turno == 2:
+            temp_inst_ship = Ship(self.key1, 1)
+            self.player_1_Status = [temp_inst_ship]
+            print("setup del jugador1 porque el jugador 2 empieza")
+          elif self.turno == 1:
+            temp_inst_ship = Ship(self.key2, 2)
+            self.player_2_Status = [temp_inst_ship]
+            print("setup del jugador2 porque el jugador 1 empieza")
+          print("SETUP LISTO-------------------------->")
+          self.update_change()
+      except:
+          pass
+  
+  #Manejo del cambio de jugador
+  def change_player(self):
+    if self.turno == 1:
+      #Actualizar la información del juego actual
+      self.player_1_Status = [self.inst_ship]
+      #cambiar de turno
+      self.turno = 2
+      self.inst_ship = self.player_2_Status[0]
+    elif self.turno == 2:
+      self.player_2_Status = [self.inst_ship]
+      #cambiar de turno
+      self.turno = 1
+      self.inst_ship = self.player_1_Status[0]
+    elif self.turno == 0:
+      return 0               #Caso cuando hay un solo jugador, y prevenir cambios 
+
+    self.inst_entities = []
+    self.inst_entities.append(self.inst_ship)
+    
+    print("Es el turno del jugador->>>", self.turno)
+
+
 
 
   #Setup de los joysticks
@@ -292,24 +332,6 @@ class game:
         mouse_pos = pygame.mouse.get_pos()
         if self.button_rect.collidepoint(mouse_pos):
           self.paused = False
-  #Intentar la conexion con el control
-  def controlconection(self):
-    try:
-      self.v_axis = self.joystick.get_axis(1)
-      self.h_axis = self.joystick.get_axis(0)
-    except:
-      self.v_axis = 0
-      self.h_axis = 0
-  #seleccionar que jugador comienza el juego
-  def startingPlayer(self):
-    if self.key2 == None:
-      return Ship(self.key1, 1)
-    else:
-      ran = random.randint(1,2)
-      if ran ==1:
-        return Ship(self.key1, 1)
-      else:
-        return Ship(self.key2, 2)
   #Revisar los eventos del juego
   def game_events(self):
         for event in pygame.event.get():
@@ -328,8 +350,9 @@ class game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.button_rect.collidepoint(mouse_pos):
-                    self.paused = True
-                    #pygame.display.iconify()  # Función de pygame para minimizar la ventana
+                    #self.paused = True
+                    self.change_player()
+                    #pygame.display.iconify()  # Función de pygame para minimizar la ventana-------------
             elif event.type == pygame.JOYBUTTONDOWN:
                 if event.button == 3:
                     self.change_bonus()
@@ -341,6 +364,30 @@ class game:
                     if bullet:
                         self.inst_entities.append(bullet)
                         self.collision_observer.register([bullet])
+  #seleccionar que jugador comienza el juego
+  def startingPlayer(self):
+    if self.key2 == None:                           #Un jugador
+      self.inst_ship = Ship(self.key1, 1)
+    else:                                           #Dos Jugadores
+      ran = random.randint(1,2)
+      if ran ==1:
+        self.inst_ship = Ship(self.key1, 1)
+        self.turno = 1
+        self.player_1_Status = [self.inst_ship]
+      else:
+        self.inst_ship = Ship(self.key2, 2)
+        self.turno = 2
+        self.player_2_Status = [self.inst_ship]
+    print("Turno INICIAL ES: ", self.turno)
+  
+  #Intentar la conexion con el control
+  def controlconection(self):
+    try:
+      self.v_axis = self.joystick.get_axis(1)
+      self.h_axis = self.joystick.get_axis(0)
+    except:
+      self.v_axis = 0
+      self.h_axis = 0
   #Mover a los enemigos
   def mover_enemigos(self): 
     if self.t >= 60:
