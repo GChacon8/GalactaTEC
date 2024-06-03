@@ -1,51 +1,51 @@
 [
-    {
-        "key": 1,
-        "username": "gchacon8",
-        "password": "12345678",
-        "full_name": "Gabriel Chacon Alfaro",
-        "email": "gchacon8@estudiantec.com",
-        "photo": "Images/spaceship.png",
-        "ship": "Images/spaceship.png",
-        "music": "",
-        "highscore": "1000"
-    },
-    {
-        "key": 2,
-        "username": "vale",
-        "password": "Bbbbbb2@",
-        "full_name": "Valeria Morales",
-        "email": "valemorales07@estudiantec.cr",
-        "photo": "Images/pp.png",
-        "ship": "Images/ships/ship4.png",
-        "music": "",
-        "highscore": "2000"
-    },
-    {
-        "key": 3,
-        "username": "giank",
-        "password": "Ab1234!",
-        "full_name": "Giancarlo",
-        "email": "valeriamorales40@gmail.com",
-        "photo": "Images/pp2.png",
-        "ship": "Images/ships/ship1.png",
-        "music": [
-            "C:/Users/valer/OneDrive/Documentos/GitHub/GalactaTEC/Songs/Black Sabbath - Paranoid.mp3",
-            "C:/Users/valer/OneDrive/Documentos/GitHub/GalactaTEC/Songs/I Don't Care - VIRA.mp3"
-        ],
-        "highscore": "3000"
-    },
-    {
-        "key": 4,
-        "username": "dada",
-        "password": "Bbbbbb2@",
-        "full_name": "Daniel Castro",
-        "email": "dcastroeli3009@gmail.com",
-        "photo": "Images/pp2.png",
-        "ship": "Images/ships/ship1.png",
-        "music": [
-            "D:/Tec/Cursos/Modelado/GalactaTEC/Songs/I Don't Care - VIRA.mp3"
-        ],
-        "highscore": "9000"
-    }
+  {
+    "key": 1,
+    "username": "gchacon8",
+    "password": "12345678",
+    "full_name": "Gabriel Chacon Alfaro",
+    "email": "gchacon8@estudiantec.com",
+    "photo": "Images/spaceship.png",
+    "ship": "Images/spaceship.png",
+    "music": "",
+    "highscore": "1000"
+  },
+  {
+    "key": 2,
+    "username": "vale",
+    "password": "Bbbbbb2@",
+    "full_name": "Valeria Morales",
+    "email": "valemorales07@estudiantec.cr",
+    "photo": "Images/pp.png",
+    "ship": "Images/ships/ship4.png",
+    "music": "",
+    "highscore": "2000"
+  },
+  {
+    "key": 3,
+    "username": "giank",
+    "password": "Ab1234!",
+    "full_name": "Giancarlo",
+    "email": "valeriamorales40@gmail.com",
+    "photo": "Images/pp2.png",
+    "ship": "Images/ships/ship1.png",
+    "music": [
+      "C:/Users/valer/OneDrive/Documentos/GitHub/GalactaTEC/Songs/Black Sabbath - Paranoid.mp3",
+      "C:/Users/valer/OneDrive/Documentos/GitHub/GalactaTEC/Songs/I Don't Care - VIRA.mp3"
+    ],
+    "highscore": "3000"
+  },
+  {
+    "key": 4,
+    "username": "dada",
+    "password": "Bbbbbb2@",
+    "full_name": "Daniel Castro",
+    "email": "dcastroeli3009@gmail.com",
+    "photo": "Images/pp2.png",
+    "ship": "Images/ships/ship1.png",
+    "music": [
+      "D:/Tec/Cursos/Modelado/GalactaTEC/Songs/I Don't Care - VIRA.mp3"
+    ],
+    "highscore": "9000"
+  }
 ]

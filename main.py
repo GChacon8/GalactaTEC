@@ -2,9 +2,6 @@ import login
 import tkinter as tk
 import AnimatedGIF
 
-from menu import init_menu
-
-
 class main:
     def __init__(self):
         self.window = tk.Tk()
@@ -19,5 +16,7 @@ class main:
 
         win = login.login(self.window, self.animated_gif)
         win.showLogin()
-        
-main()
+
+
+if __name__ == "__main__":  
+    win = main()

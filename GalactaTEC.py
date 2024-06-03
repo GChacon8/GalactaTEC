@@ -9,8 +9,6 @@ import menu
 import login
 import json
 
-from Enemy import Enemy
-from Factory import EnemyFactory
 from Enemy_movement import EnemyMovement
 from Observer import Collidable, CollisionObserver
 
@@ -54,10 +52,13 @@ class Ship (Collidable):
     self.bonus_colleted = []
 
     self.bonus_sound = pygame.mixer.Sound("sounds/bonus.wav")
+    self.bonus_sound.set_volume(0.5)
     self.hit_sound = pygame.mixer.Sound("sounds/hit.wav") 
-    self.hit_sound.set_volume(0.25)
+    self.hit_sound.set_volume(0.5)
     self.moving_sound = pygame.mixer.Sound("sounds/move.mp3")
-    self.moving_sound.set_volume(0.5)
+    self.moving_sound.set_volume(0.05)
+    self.sound_bullet = pygame.mixer.Sound("sounds/bullet.wav")
+    self.sound_bullet.set_volume(0.05)
 
     self.life = 5
     self.points = 0
@@ -69,15 +70,8 @@ class Ship (Collidable):
     # Aviable Bullet Type 
     self.bullet_types = [BulletShipType.SIMPLE]  # Por defecto, solo tiene balas simples
 
-    # Sounds OF Bullets
-    self.sound_bonus_chasing_bullet = pygame.mixer.Sound("sounds/chasing_bullet.wav")
-    self.sound_bonus_chasing_bullet.set_volume(0.05)
+    self.shield: Shield | None = None
 
-    self.sound_bonus_expanding_bullet = pygame.mixer.Sound("sounds/expanding_bullet.wav")
-    self.sound_bonus_expanding_bullet.set_volume(0.05)
-
-    self.sound_bullet = pygame.mixer.Sound("sounds/bullet.wav")
-    self.sound_bullet.set_volume(0.05)
 
 
   def update(self, keys, h_axis, v_axis):
@@ -86,16 +80,12 @@ class Ship (Collidable):
 
     if keys[pygame.K_LEFT] or h_axis<-0.5:
       self.rect.x -= self.speed
-      self.moving_sound.play()
     if keys[pygame.K_RIGHT] or h_axis>0.5:
       self.rect.x += self.speed
-      self.moving_sound.play()
     if keys[pygame.K_UP] or v_axis<-0.5:
       self.rect.y -= self.speed
-      self.moving_sound.play()
     if keys[pygame.K_DOWN] or v_axis>0.5:
       self.rect.y += self.speed
-      self.moving_sound.play()
     # Limitar la nave dentro de los límites de la pantalla
     self.rect.x = max(0, min(self.rect.x, game.SCREEN_WIDTH - self.rect.width))
     self.rect.y = max(0, min(self.rect.y, game.SCREEN_HEIGHT - self.rect.height-50))
@@ -118,9 +108,29 @@ class Ship (Collidable):
         self.bonus_sound.play()
     elif isinstance(other, Enemy):
         if self.invulnerable_time == 0:  # Solo resta vida si no está invulnerable
-            self.life -= 1
             self.hit_sound.play()
             self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
+          
+            game.POINTS_TO_ADD += 200
+            if self.shield is not None:
+               self.shield.hits -= 1
+               if self.shield.hits <= 0:
+                   self.shield.kill()
+                   self.shield = None
+            else:
+              self.life -= 1
+              ## CHANGE PLAYER
+    elif isinstance(other, BulletEnemy):
+      self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
+      self.hit_sound.play()
+      if self.invulnerable_time == 0:  # Solo resta vida si no está invulnerable
+         if self.shield is not None:
+               self.shield.hits -= 1 if other.type == BulletEnemyType.SIMPLE else 2
+               if self.shield.hits <= 0:
+                   self.shield.kill()
+                   self.shield = None
+
+            
   def get_life(self):
     return self.life
   def add_life(self, life=1):
@@ -141,15 +151,14 @@ class Ship (Collidable):
   def shoot(self):
     bullet_type = self.bullet_types[0]  # Obtiene el primer tipo de bala de la lista
     bullet = BulletShip(self, bullet_type)
-    if bullet_type == BulletShipType.CHASING:
-      self.sound_bonus_chasing_bullet.play()
-      self.bullet_types.pop(0)
-    elif bullet_type == BulletShipType.EXPANDING:
-      self.sound_bonus_expanding_bullet.play()
-      self.bullet_types.pop(0)
-    else:
-      self.sound_bullet.play()
+    self.sound_bullet.play()
     return bullet
+  
+  def set_shield(self, shield):
+    self.shield = shield
+
+  def get_shield(self):
+    return self.shield
 
 class AnimatedBackground(pygame.sprite.Sprite):
   def __init__(self, position, images, delay):
@@ -227,7 +236,7 @@ class game:
       self.paused = False
 
       # Sounds
-      volume = 0.005
+      volume = 0.10
       self.gameMusic = pygame.mixer.Sound("Songs/Spectre Music.mp3")
       self.gameMusic.set_volume(0.5)
 
@@ -240,7 +249,7 @@ class game:
       self.sound_bonus_shield = pygame.mixer.Sound("sounds/shield.wav")
       self.sound_bonus_shield.set_volume(volume)
 
-      self.gameMusic.play()
+      self.gameMusic.play(-1)
       #argumentos para el control
       self.joystick = None
       self.v_axis = 0
@@ -392,19 +401,12 @@ class game:
               self.sound_bonus_extra_life.play()
               active_bonuses.pop(0)
           elif selected_bonus.type == BonusType.SHIELD:
-              self.shield = Shield(self.inst_ship.rect.centerx, self.inst_ship.rect.centery)
-              self.inst_entities.append(self.shield)  # Add shield to entities
-              self.collision_observer.register([self.shield]) # Add shield to collision observer
+              self.inst_ship.set_shield(
+                 Shield(self.inst_ship.rect.centerx, self.inst_ship.rect.centery)
+              )
+              self.inst_entities.append(self.inst_ship.shield)  # Add shield to entities
               self.sound_bonus_shield.play()
               active_bonuses.pop(0)
-          elif selected_bonus.type == BonusType.CHASING_BULLET:
-            self.inst_ship.bullet_types.insert(0, BulletShipType.CHASING)
-            self.inst_ship.bullet_types.insert(0, BulletShipType.CHASING)
-            self.inst_ship.bullet_types.insert(0, BulletShipType.CHASING)
-            self.inst_ship.bonus_colleted.pop(0)
-          elif selected_bonus.type == BonusType.EXPANDING_BULLET:
-            self.inst_ship.bullet_types.insert(0, BulletShipType.EXPANDING)
-            self.inst_ship.bonus_colleted.pop(0)
           elif selected_bonus.type == BonusType.DOUBLE_POINTS:
              self.inst_ship.points_multiplier = 2
              self.inst_ship.bonus_colleted.pop(0)
@@ -559,13 +561,18 @@ class game:
     self.draw_menu_game()
   #Revisar colisiones
   def check_killed(self):
-      for entity in self.inst_entities:
-        if not entity.get_isAlive():
-          self.inst_entities.remove(entity)
-          if isinstance(entity, Enemy):
-            self.inst_enemies.remove(entity)
-          elif isinstance(entity, Ship):
-            self.quit()
+      # Copia para evitar modificar la lista mientras iteras
+      entities_to_check = self.inst_entities.copy()
+      for entity in entities_to_check:
+          if not entity.get_isAlive():
+              self.inst_entities.remove(entity)
+              if isinstance(entity, Enemy):
+                  # Elimina el enemigo de cada lista dentro de la matriz
+                  for sublist in self.inst_enemies:
+                      if entity in sublist:
+                          sublist.remove(entity)
+                
+
   #Dibujar texto multilinea
   def draw_text_multiline(surface, text, x_0, y_0, max_x, font, color):
     words = text.split()
@@ -601,8 +608,8 @@ class game:
 ### BONUS
 
 class BonusType(enum.Enum):
-  CHASING_BULLET = "Chasing Bullet"
-  EXPANDING_BULLET = "Expanding Bullet"
+  # CHASING_BULLET = "Chasing Bullet"
+  # EXPANDING_BULLET = "Expanding Bullet"
   DOUBLE_POINTS = "Double Points"
   SHIELD = "Shield"
   EXTRA_LIFE = "Extra Life"
@@ -649,14 +656,14 @@ class Bonus(Collidable):
 ### SHIELD
 class Shield(Collidable):
     PIXELS_FRONT_OF_SHIP = 40
-    def __init__(self, x, y, level=3):
+    def __init__(self, x, y, hits=3):
         super().__init__()
         self.image = pygame.image.load("Images/shield.png")  # Asegúrate de tener la imagen del escudo en la carpeta Images
         self.image = pygame.transform.scale(self.image, 
                                             (Ship.WIDTH, int(0.25 * Ship.WIDTH)))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y - Shield.PIXELS_FRONT_OF_SHIP)  # Ajusta la posición vertical del escudo según sea necesario
-        self.level = level
+        self.hits = hits
         self.font = pygame.font.Font("fonts/GenericTechno.otf", 14) 
 
     def update(self, x, y):
@@ -664,15 +671,15 @@ class Shield(Collidable):
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-        level_text = str(self.level)
+        level_text = str(self.hits)
         text_surface = self.font.render(level_text, True, (0,0,0))  # Color del texto en blanco
         text_rect = text_surface.get_rect(center=self.rect.center)
         screen.blit(text_surface, text_rect)
 
     def on_collision(self, other):
         if isinstance(other, Enemy):
-            self.level -= 1
-            if self.level <= 0:
+            self.hits -= 1
+            if self.hits <= 0:
                 self.kill()
 
 
@@ -680,20 +687,14 @@ class Shield(Collidable):
 
 class BulletShipType(enum.Enum):
     SIMPLE = "Simple"
-    CHASING = "Chasing"
-    EXPANDING = "Expanding"
 
 class BulletShip(Collidable):
   WIDTH = 20
 
   def __init__(self, ship, bullet_type=BulletShipType.SIMPLE):
     super().__init__()
-    if bullet_type == BulletShipType.CHASING:
-        self.image = pygame.image.load("Images/chasing_bullet.png")
-    elif bullet_type == BulletShipType.EXPANDING:
-        self.image = pygame.image.load("Images/expanding_bullet.png")
-    else:
-      self.image = pygame.image.load("Images/simple_bullet.png")
+
+    self.image = pygame.image.load("Images/simple_bullet.png")
     self.image = pygame.transform.scale(self.image, (BulletShip.WIDTH, BulletShip.WIDTH))  # Ajusta el tamaño de la bala
     self.rect = self.image.get_rect()
     self.rect.center = ship.rect.center
@@ -702,11 +703,7 @@ class BulletShip(Collidable):
     self.active = True
 
   def update(self):
-    if self.bullet_type == BulletShipType.CHASING:
-      self.rect.y -= 1
-      self.rect.x += 10
-    else:
-      self.rect.y -= 5
+    self.rect.y -= 5
 
     if self.rect.y < 0 or self.rect.x > game.SCREEN_WIDTH or self.rect.x < 0:
       self.kill()
@@ -722,7 +719,143 @@ class BulletShip(Collidable):
         self.kill()
         game.POINTS_TO_ADD += 200
 
-if __name__ == "__main__":
-  inst_galacta = galacta()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############ Clase Enemy ##############
+
+class Enemy(Collidable):
+
+  sound_enemy = pygame.mixer.Sound("sounds/enemy_death.wav")
+  sound_enemy.set_volume(0.5)
+
+  def __init__(self,posx,posy):
+    super().__init__()
+    self.image = pygame.image.load("Images/enemy.png")
+    self.image = pygame.transform.smoothscale(self.image, (40, 40))
+    self.rect = self.image.get_rect()
+    self.rect.x = posx
+    self.rect.y = posy
+
+    #self.startx = posx
+    #self.starty = posy
+    self.pos = posx
+
+    self.active = True  #Para saber si está vivo o no
 
   
+  #No la he usado aún, pero sirve para "teletransportarse"
+  def move(self, x, y):
+    self.rect.x = x
+    self.rect.y = y
+
+    # Limitar la nave dentro de los límites de la pantalla
+    self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
+    self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
+
+  def move_rigth(self,num):
+     self.rect.x += num
+  
+  def move_left(self,num):
+     self.rect.x -= num
+
+  def move_down(self, num):
+    self.rect.y += num
+    #print(max(0, min(self.rect.x, 800 - self.rect.width)))
+
+  def move_up(self,num):
+     self.rect.y -= num
+
+  def draw(self, screen: pygame.Surface):
+    if self.active:
+      screen.blit(self.image, self.rect)
+    else:
+      pass
+
+  def get_x_coords(self):
+    return self.rect.x
+
+  def get_y_coords(self):
+    return self.rect.y
+
+  def on_collision(self, other: Collidable):
+    # print("Enemy collided with:", other)
+    if isinstance(other, BulletShip):
+      self.kill()
+      Enemy.sound_enemy.play()
+
+  
+  def is_alive(self):
+    return self.active
+
+
+
+
+############ Clase Factory ############
+class EnemyFactory:
+    def __init__(self, screenWidth):
+        self.screenWidth = screenWidth
+        self.startx = screenWidth
+        self.starty = -240
+
+    def create_enemies(self,row:int,col:int) -> tuple[list[list[Enemy]],list[Enemy]]:
+        enemies=[]
+        enemies_aux=[]
+        enemies_list:list[Enemy]=[]
+
+        for i in range(row):
+            self.startx = (self.screenWidth - (col * 90 - 45)) // 2
+            for j in range(col):
+                enemies_aux.append(Enemy(self.startx, self.starty))
+                self.startx+=90
+
+            enemies.append(enemies_aux)
+            enemies_list.extend(enemies_aux)
+            enemies_aux=[]
+            col-=1
+            self.startx=0
+            self.starty+=40
+        return (enemies,enemies_list)
+
+
+
+############ Clase BulletEnemy ############
+
+class BulletEnemyType(enum.Enum):
+   SIMPLE = "Simple"
+   CHARGED = "Charged"
+
+class BulletEnemy(Collidable):
+   
+   def __init__(self, posx, posy, bullet_type):
+     super().__init__()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
