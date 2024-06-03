@@ -183,39 +183,40 @@ class game:
       self.all_sprites = pygame.sprite.Group()
       self.all_sprites.add(self.background)
       self.button_rect = pygame.Rect(self.width-75,self.height-75,25,25) #Posición del boton de ayuda COLOCAR EN LA BARRA DE JUEGO
-      self.paused = False
       pygame.display.set_caption("GalactaTEC")
 
       self.key1 = key1
       self.key2 = key2
-      self.inst_ship = None
-      self.turno = 0
+      self.inst_ship = None                             #---------------------
+      self.turno = 0  
       self.startingPlayer()         
             
-      factory = EnemyFactory(self.SCREEN_WIDTH)
-      enemies = factory.create_enemies(6, 6)
-      self.inst_enemies = enemies[0]
+      self.factory = EnemyFactory(self.SCREEN_WIDTH)         #---------------------
+      self.enemies = self.factory.create_enemies(6, 6)            #---------------------
+      self.inst_enemies = self.enemies[0]                    #---------------------
       self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,3)#se elige el patron de vuelo
-      
+      #---------------------
       
       self.bullets = []
       self.available_bonus_types = list(BonusType)  # Lista de tipos de bonos disponibles
       self.bonus_timer = 0
       self.bonus_interval = game.BONUS_TIME  # 30 segundos
 
-      self.inst_entities = []
-      self.inst_entities.append(self.inst_ship)
-      self.inst_entities.extend(enemies[1])
+      self.inst_entities = []                           
+      self.inst_entities.append(self.inst_ship)         
+      self.inst_entities.extend(self.enemies[1])             
 
       # Observer
-      self.collision_observer = CollisionObserver()
-      self.collision_observer.register(self.inst_entities)
+      self.collision_observer = CollisionObserver()     
+      self.collision_observer.register(self.inst_entities)  
 
-      self.setup_counter = 0
-      self.t = 0
-      self.running = True
-      self.movement = False
-      self.paused = False
+      self.setup_counter = 0  
+      self.t = 0              
+      self.running = True    
+      self.movement = False   
+      self.paused = False     
+      self.time_text = 0      #-------------------
+      
 
       # Sounds
       volume = 0.005
@@ -250,6 +251,7 @@ class game:
   def run(self):
       self.joystick_init()
       clock = pygame.time.Clock()
+      self.time_text = 0
       while self.running:
           dt = clock.tick(game.FRAME_RATE)
           self.bonus_timer += dt
@@ -279,39 +281,145 @@ class game:
       #No solo cambiar qué nave se utiliza, sino también la música y todas esas cosas
       try:
           if self.turno == 2:
-            temp_inst_ship = Ship(self.key1, 1)
-            self.player_1_Status = [temp_inst_ship]
+            # Creación de una instancia de Ship y EnemyFactory
+            temp_inst_ship = Ship(self.key1, 1)             #INDICE 0
+            temp_factory = EnemyFactory(self.SCREEN_WIDTH)  #INDICE 1
+            temp_enemies = temp_factory.create_enemies(6, 6)  #INDICE 2
+            temp_inst_enemies = temp_enemies[0]             #INDICE 3
+            temp_inst_enemyMovement = EnemyMovement(temp_inst_enemies, self.SCREEN_WIDTH, self.SCREEN_HEIGHT, 3)  # INDICE 4
+            temp_inst_entities = []                         #INDICE 5
+            temp_inst_entities.append(temp_inst_ship)
+            temp_inst_entities.extend(temp_enemies[1])
+            temp_collision_observer = CollisionObserver()             #INDICE 6
+            temp_collision_observer.register(temp_inst_entities)       #INDICE 7
+            temp_setup_counter = 0                          #INDICE 8
+            temp_t = 0                                      #INDICE 9
+            temp_movement = False                           #INDICE 10
+
+            # Lista de status del jugador
+            self.player_1_Status = [
+                temp_inst_ship,         # INDICE 0
+                temp_factory,           # INDICE 1
+                temp_enemies,           # INDICE 2
+                temp_inst_enemies,      # INDICE 3
+                temp_inst_enemyMovement,# INDICE 4
+                temp_inst_entities,     # INDICE 5
+                temp_collision_observer,# INDICE 6
+                temp_setup_counter,     # INDICE 7
+                temp_t,                 # INDICE 8
+                temp_movement           # INDICE 9
+            ]
+
             print("setup del jugador1 porque el jugador 2 empieza")
           elif self.turno == 1:
-            temp_inst_ship = Ship(self.key2, 2)
-            self.player_2_Status = [temp_inst_ship]
+            temp_inst_ship = Ship(self.key2, 2)             #INDICE 0
+            temp_factory = EnemyFactory(self.SCREEN_WIDTH)  #INDICE 1
+            temp_enemies = temp_factory.create_enemies(6, 6)  #INDICE 2
+            temp_inst_enemies = temp_enemies[0]             #INDICE 3
+            temp_inst_enemyMovement = EnemyMovement(temp_inst_enemies, self.SCREEN_WIDTH, self.SCREEN_HEIGHT, 3)  # INDICE 4
+            temp_inst_entities = []                         #INDICE 5
+            temp_inst_entities.append(temp_inst_ship)
+            temp_inst_entities.extend(temp_enemies[1])
+            temp_collision_observer = CollisionObserver()             #INDICE 6
+            temp_collision_observer.register(temp_inst_entities)       #INDICE 7
+            temp_setup_counter = 0                          #INDICE 8
+            temp_t = 0                                      #INDICE 9
+            temp_movement = False                           #INDICE 10
+
+            # Lista de status del jugador
+            self.player_2_Status = [
+                temp_inst_ship,         # INDICE 0
+                temp_factory,           # INDICE 1
+                temp_enemies,           # INDICE 2
+                temp_inst_enemies,      # INDICE 3
+                temp_inst_enemyMovement,# INDICE 4
+                temp_inst_entities,     # INDICE 5
+                temp_collision_observer,# INDICE 6
+                temp_setup_counter,     # INDICE 7
+                temp_t,                 # INDICE 8
+                temp_movement           # INDICE 9
+            ]
             print("setup del jugador2 porque el jugador 1 empieza")
           print("SETUP LISTO-------------------------->")
-          self.update_change()
       except:
           pass
   
-  #Manejo del cambio de jugador
+  #Manejo del cambio de jugador        HAY ERROR EN CAMBIAR AL PATRÓN DE MOVIMIENTO Y COLISIONES, probar reiniciar los objetos y hacer el append y eso
   def change_player(self):
-    if self.turno == 1:
-      #Actualizar la información del juego actual
-      self.player_1_Status = [self.inst_ship]
-      #cambiar de turno
-      self.turno = 2
-      self.inst_ship = self.player_2_Status[0]
-    elif self.turno == 2:
-      self.player_2_Status = [self.inst_ship]
-      #cambiar de turno
-      self.turno = 1
-      self.inst_ship = self.player_1_Status[0]
-    elif self.turno == 0:
-      return 0               #Caso cuando hay un solo jugador, y prevenir cambios 
-
-    self.inst_entities = []
-    self.inst_entities.append(self.inst_ship)
+      if self.turno == 1:
+        # Actualizar la información del juego actual para el jugador 1
+        self.player_1_Status = [
+            self.inst_ship,           # INDICE 0
+            self.factory,             # INDICE 1
+            self.enemies,             # INDICE 2
+            self.inst_enemies,        # INDICE 3
+            self.inst_enemyMovement,  # INDICE 4
+            self.inst_entities,       # INDICE 5
+            self.collision_observer,  # INDICE 6
+            self.setup_counter,       # INDICE 7
+            self.t,                   # INDICE 8
+            self.movement             # INDICE 9
+        ]
+        
+        # Cambiar de turno
+        self.turno = 2
+        
+        # Actualizar instancias con la información del jugador 2
+        self.inst_ship = self.player_2_Status[0]
+        self.factory = self.player_2_Status[1]
+        self.enemies = self.player_2_Status[2]
+        self.inst_enemies = self.player_2_Status[3]
+        self.inst_enemyMovement = self.player_2_Status[4]
+        self.inst_entities = self.player_2_Status[5]
+        self.collision_observer = self.player_2_Status[6]
+        self.setup_counter = self.player_2_Status[7]
+        self.t = self.player_2_Status[8]
+        self.movement = self.player_2_Status[9]
+        
+        # Actualizar entidades para el jugador 2
+        #self.inst_entities = []
+        #self.inst_entities.append(self.inst_ship)
+        #self.inst_entities.extend(self.enemies[1])
+        
+      elif self.turno == 2:
+        # Actualizar la información del juego actual para el jugador 2
+        self.player_2_Status = [
+            self.inst_ship,           # INDICE 0
+            self.factory,             # INDICE 1
+            self.enemies,             # INDICE 2
+            self.inst_enemies,        # INDICE 3
+            self.inst_enemyMovement,  # INDICE 4
+            self.inst_entities,       # INDICE 5
+            self.collision_observer,  # INDICE 6
+            self.setup_counter,       # INDICE 7
+            self.t,                   # INDICE 8
+            self.movement             # INDICE 9
+        ]
+        
+        # Cambiar de turno
+        self.turno = 1
+        
+        # Actualizar instancias con la información del jugador 1
+        self.inst_ship = self.player_1_Status[0]
+        self.factory = self.player_1_Status[1]
+        self.enemies = self.player_1_Status[2]
+        self.inst_enemies = self.player_1_Status[3]
+        self.inst_enemyMovement = self.player_1_Status[4]
+        self.inst_entities = self.player_1_Status[5]
+        self.collision_observer = self.player_1_Status[6]
+        self.setup_counter = self.player_1_Status[7]
+        self.t = self.player_1_Status[8]
+        self.movement = self.player_1_Status[9]
+        
+        # Actualizar entidades para el jugador 1
+        #self.inst_entities = []
+        #self.inst_entities.append(self.inst_ship)
+        #self.inst_entities.extend(self.enemies[1])
     
-    print("Es el turno del jugador->>>", self.turno)
-
+      elif self.turno == 0:
+        return 0  # Caso cuando hay un solo jugador, y prevenir cambios
+      
+      print("Es el turno del jugador->>>", self.turno)
 
 
 
@@ -352,7 +460,7 @@ class game:
                 if self.button_rect.collidepoint(mouse_pos):
                     #self.paused = True
                     self.change_player()
-                    #pygame.display.iconify()  # Función de pygame para minimizar la ventana-------------
+                    
             elif event.type == pygame.JOYBUTTONDOWN:
                 if event.button == 3:
                     self.change_bonus()
@@ -379,7 +487,6 @@ class game:
         self.turno = 2
         self.player_2_Status = [self.inst_ship]
     print("Turno INICIAL ES: ", self.turno)
-  
   #Intentar la conexion con el control
   def controlconection(self):
     try:
@@ -401,7 +508,7 @@ class game:
       self.setup_counter+=1
       self.t=0
     else:
-      self.t+=5 #para colocar las naves inicialmente poner en +=1
+      self.t+=1 #para colocar las naves inicialmente poner en +=1            ------------------------------------------------------
     if self.movement:      
       self.inst_enemyMovement.do_movement()
   #Creación del bonus aleatorio
@@ -525,8 +632,8 @@ class game:
   #Dibujar el tiempo
   def draw_time(self, font, text_color):
     if not self.paused:
-      time_text = f"Time: {pygame.time.get_ticks() // 1000}"
-      text_surface = font.render(time_text, True, text_color)
+      self.time_text = f"Time: {pygame.time.get_ticks() // 1000}"
+      text_surface = font.render(self.time_text, True, text_color)
       text_x = game.SCREEN_WIDTH - int(game.SCREEN_WIDTH * (1-0.25))
       text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
       self.screen.blit(text_surface, (text_x, text_y))
