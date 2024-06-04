@@ -96,12 +96,10 @@ class EnemyMovement:
 
         elif self.enemigo_random.get_y_coords() >= self.screenHeight-100:
             self.goingdown = False
-            print("va pa rriba")
         else:
-            self.contador = random.randint(0, 99)
+            self.contador = random.randint(0, 149)
             self.pattern_2()
             
-
     def pattern_4(self):
         pass
 
