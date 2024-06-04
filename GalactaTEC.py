@@ -210,7 +210,7 @@ class game:
       #---------------------
       
       self.bullets = []
-      self.available_bonus_types = list(BonusType)  # Lista de tipos de bonos disponibles
+      self.available_bonus_types = [BonusType.SHIELD]#list(BonusType)  # Lista de tipos de bonos disponibles
       self.bonus_timer = 0
       self.bonus_interval = game.BONUS_TIME  # 30 segundos
 
@@ -880,7 +880,7 @@ class Shield(Collidable):
         super().__init__()
         self.image = pygame.image.load("Images/shield_3.png")  # Asegúrate de tener la imagen del escudo en la carpeta Images
         self.image = pygame.transform.scale(self.image, 
-                                            (Ship.WIDTH, int(0.25 * Ship.WIDTH)))
+                                            (Ship.WIDTH, int(Ship.WIDTH)))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y - Shield.PIXELS_FRONT_OF_SHIP)  # Ajusta la posición vertical del escudo según sea necesario
         self.hits = hits
@@ -893,9 +893,11 @@ class Shield(Collidable):
     def draw(self, screen):
       if self.active and self.hits > 0:
         self.image = pygame.image.load("Images/shield_" + str(self.hits) + ".png") 
+        self.image = pygame.transform.scale(self.image, 
+                                            (Ship.WIDTH, int( 0.25 * (self.hits) * Ship.WIDTH)))
         screen.blit(self.image, self.rect)
         level_text = str(self.hits)
-        text_surface = self.font.render(level_text, True, (0,0,0))  # Color del texto en blanco
+        text_surface = self.font.render(level_text, True, (255,0,255))  # Color del texto en blanco
         text_rect = text_surface.get_rect(center=self.rect.center)
         screen.blit(text_surface, text_rect)
 
