@@ -105,7 +105,7 @@ class Ship (Collidable):
             self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
             game.VIBRATION = True
             game.POINTS_TO_ADD += 200
-            ## CHANGE PLAYER
+            game.CHANGE_PLAYER = True
     elif isinstance(other, BulletEnemy):
       if self.invulnerable_time == 0:  # Solo resta vida si no está invulnerable
         self.hit_sound.play()
@@ -119,7 +119,7 @@ class Ship (Collidable):
           self.life -= hit
         self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
         game.VIBRATION = True
-        ## CHANGE PLAYER
+        game.CHANGE_PLAYER = True
 
             
   def get_life(self):
@@ -178,6 +178,7 @@ class game:
   SHOT_ENEMY_COOLDOWN =  2000  # ms entre disparos
   VIBRATION = False
   CONTROLLER = False
+  CHANGE_PLAYER = False
 
   def __init__(self, key1, key2 = None):
       self.width = game.SCREEN_WIDTH
@@ -231,7 +232,7 @@ class game:
 
       # Sounds
       volume = 0.10
-      self.gameMusic = pygame.mixer.Sound("Songs/Spectre Music.mp3")
+      self.gameMusic = pygame.mixer.Sound("Songs/music_1.mp3")
       self.gameMusic.set_volume(0.5)
 
       self.sound_bonus_extra_life = pygame.mixer.Sound("sounds/extra_life.wav")
@@ -243,7 +244,6 @@ class game:
       self.sound_bonus_shield = pygame.mixer.Sound("sounds/shield.wav")
       self.sound_bonus_shield.set_volume(volume)
 
-      self.gameMusic.play(-1)
       #argumentos para el control
       self.joystick = None
       self.v_axis = 0
@@ -301,6 +301,7 @@ class game:
               # SET JSON (KEY, VALUE)
             pygame.display.flip()
             self.check_killed()
+            self.is_time_to_change()
             # IF TERMINO:
             #   PREMIACION = INITACION DE PREMACION()
   
@@ -815,6 +816,14 @@ class game:
     if game.VIBRATION and game.CONTROLLER:
       self.joystick.rumble(1,1,1000)
       game.VIBRATION = False
+
+  def is_time_to_change(self):
+      if self.key2 is None:
+        return
+      else:
+         if game.CHANGE_PLAYER:
+            game.CHANGE_PLAYER = False
+            self.change_player()
      
 ### BONUS
 
@@ -869,18 +878,21 @@ class Shield(Collidable):
     PIXELS_FRONT_OF_SHIP = 40
     def __init__(self, x, y, hits=3):
         super().__init__()
-        self.image = pygame.image.load("Images/shield.png")  # Asegúrate de tener la imagen del escudo en la carpeta Images
+        self.image = pygame.image.load("Images/shield_3.png")  # Asegúrate de tener la imagen del escudo en la carpeta Images
         self.image = pygame.transform.scale(self.image, 
                                             (Ship.WIDTH, int(0.25 * Ship.WIDTH)))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y - Shield.PIXELS_FRONT_OF_SHIP)  # Ajusta la posición vertical del escudo según sea necesario
         self.hits = hits
         self.font = pygame.font.Font("fonts/GenericTechno.otf", 14) 
+        self.active = True
 
     def update(self, x, y):
         self.rect.center = (x, y - Shield.PIXELS_FRONT_OF_SHIP)  # Actualiza la posición del escudo según la posición de la nave
 
     def draw(self, screen):
+      if self.active and self.hits > 0:
+        self.image = pygame.image.load("Images/shield_" + str(self.hits) + ".png") 
         screen.blit(self.image, self.rect)
         level_text = str(self.hits)
         text_surface = self.font.render(level_text, True, (0,0,0))  # Color del texto en blanco
@@ -888,10 +900,7 @@ class Shield(Collidable):
         screen.blit(text_surface, text_rect)
 
     def on_collision(self, other):
-        if isinstance(other, Enemy):
-            self.hits -= 1
-            if self.hits <= 0:
-                self.kill()
+        print("Colisionando con:", other)
 
 
 ## BulletShip
