@@ -50,7 +50,7 @@ class Collidable(Entity,ABC):
 class CollisionRules:
     def __init__(self):
         self.rules = {
-            "Ship": ["Bonus", "Enemy"],
+            "Ship": ["Bonus", "Enemy", "BulletEnemy"],
             "Enemy": ["Ship", "BulletShip"],
             "BulletShip": ["Enemy", "Ship"],
             "Bonus": ["Ship"],
@@ -78,25 +78,27 @@ class CollisionObserver:
         self.collidables.extend(collidable)
 
     def update(self):
-
+        try:
         # Evita comprobar el mismo par dos veces
-        for i in range(len(self.collidables)):
-            for j in range(i + 1, len(self.collidables)):
-                collidable1 = self.collidables[i]
-                collidable2 = self.collidables[j]
-                if (
-                    collidable1.check_collision(collidable2) and 
-                    self.rules.can_collide(collidable1, collidable2)
-                   ):
-                        collidable1.on_collision(collidable2)
-                        collidable2.on_collision(collidable1)
-                        cond1 = collidable1.get_isAlive()
-                        cond2 = collidable2.get_isAlive()
-                        if cond1== False:
-                            self.collidables.remove(collidable1)
+            for i in range(len(self.collidables)):
+                for j in range(i + 1, len(self.collidables)):
+                    collidable1 = self.collidables[i]
+                    collidable2 = self.collidables[j]
+                    if (
+                        collidable1.check_collision(collidable2) and 
+                        self.rules.can_collide(collidable1, collidable2)
+                    ):
+                            collidable1.on_collision(collidable2)
+                            collidable2.on_collision(collidable1)
+                            cond1 = collidable1.get_isAlive()
+                            cond2 = collidable2.get_isAlive()
+                            if cond1== False:
+                                self.collidables.remove(collidable1)
 
-                        if cond2 == False:
-                            self.collidables.remove(collidable2)
-                        if cond1== False or cond2== False:
-                            return
+                            if cond2 == False:
+                                self.collidables.remove(collidable2)
+                            if cond1== False or cond2== False:
+                                return
+        except:
+            pass
 

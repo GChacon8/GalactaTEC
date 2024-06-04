@@ -1,4 +1,5 @@
 import tkinter as tk
+import threading
 import AnimatedGIF
 import GalactaTEC
 from GalactaTEC import game
@@ -122,4 +123,3 @@ class init_menu:
     else:
         inst_game = game(key1, key2)
         inst_game.run()
-    
