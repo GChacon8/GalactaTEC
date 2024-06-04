@@ -421,8 +421,6 @@ class game:
       
       print("Es el turno del jugador->>>", self.turno)
 
-
-
   #Setup de los joysticks
   def joystick_init(self):
      # Inicializa los joysticks

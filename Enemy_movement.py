@@ -100,7 +100,6 @@ class EnemyMovement:
             self.contador = random.randint(0, 149)
             self.pattern_2()
             
-
     def pattern_4(self):
         pass
 
