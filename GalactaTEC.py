@@ -102,6 +102,7 @@ class Ship (Collidable):
         if self.invulnerable_time == 0:  # Solo resta vida si no está invulnerable
             self.hit_sound.play()
             self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
+            game.VIBRATION = True
           
             game.POINTS_TO_ADD += 200
             if self.shield is not None:
@@ -117,6 +118,7 @@ class Ship (Collidable):
       if self.invulnerable_time == 0:  # Solo resta vida si no está invulnerable
          self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
          self.hit_sound.play()
+         game.VIBRATION = True
          hit = 1 if other.type == BulletEnemyType.SIMPLE else 2
          if self.shield is not None:
                self.shield.hits -= hit
@@ -182,6 +184,7 @@ class game:
   PADDING_MENU = 50
   POINTS_TO_ADD = 0
   SHOT_ENEMY_COOLDOWN =  2000  # ms entre disparos
+  VIBRATION = False
 
   def __init__(self, key1, key2 = None):
       self.width = game.SCREEN_WIDTH
@@ -296,7 +299,7 @@ class game:
             self.draw_and_update_all_entities(keys, self.h_axis, self.v_axis) #Dibujar todas las entidades
             self.collision_observer.update()    #Actualizar colisiones
             self.draw_and_update_all_entities(keys, self.h_axis, self.v_axis)
-
+            self.vibration_ps4()
  
 
             if game.POINTS_TO_ADD > 0:
@@ -470,6 +473,9 @@ class game:
         mouse_pos = pygame.mouse.get_pos()
         if self.button_rect.collidepoint(mouse_pos):
           self.paused = False
+      elif event.type == pygame.JOYBUTTONDOWN:
+        if event.button == 6:
+          self.paused = False
   #Revisar los eventos del juego
   def game_events(self):
         for event in pygame.event.get():
@@ -496,6 +502,8 @@ class game:
                     self.change_bonus()
                 elif event.button == 1:
                     self.use_bonus()
+                elif event.button == 6:
+                  self.paused = True
             elif event.type == pygame.JOYAXISMOTION:
                 if event.axis == 5 and event.value == 1.0:
                     bullet = self.inst_ship.shoot()
@@ -810,8 +818,11 @@ class game:
       if bullet_type == BulletEnemyType.CHARGED:
           enemy.charged_shot_used = True
       
-
-
+  def vibration_ps4(self):
+    if game.VIBRATION:
+      self.joystick.rumble(1,1,1000)
+      game.VIBRATION = False
+     
 ### BONUS
 
 class BonusType(enum.Enum):
