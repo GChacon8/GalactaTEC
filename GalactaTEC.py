@@ -60,7 +60,7 @@ class Ship (Collidable):
     self.sound_bullet = pygame.mixer.Sound("sounds/bullet.wav")
     self.sound_bullet.set_volume(0.05)
 
-    self.life = 5
+    self.life = 3
     self.points = 0
     self.points_multiplier = 1
 
@@ -121,14 +121,19 @@ class Ship (Collidable):
               self.life -= 1
               ## CHANGE PLAYER
     elif isinstance(other, BulletEnemy):
-      self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
-      self.hit_sound.play()
+      
       if self.invulnerable_time == 0:  # Solo resta vida si no está invulnerable
+         self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
+         self.hit_sound.play()
+         hit = 1 if other.type == BulletEnemyType.SIMPLE else 2
          if self.shield is not None:
-               self.shield.hits -= 1 if other.type == BulletEnemyType.SIMPLE else 2
+               self.shield.hits -= hit
                if self.shield.hits <= 0:
                    self.shield.kill()
                    self.shield = None
+         else:
+           self.life -= hit
+
 
             
   def get_life(self):
@@ -187,6 +192,7 @@ class game:
   BONUS_PROBABILITY = 0.5
   PADDING_MENU = 50
   POINTS_TO_ADD = 0
+  SHOT_ENEMY_COOLDOWN =  2000  # ms entre disparos
 
   def __init__(self, key1, key2 = None):
       self.width = game.SCREEN_WIDTH
@@ -200,8 +206,8 @@ class game:
             for file_name in sorted(os.listdir('background_frames'))
         ]
       self.background = AnimatedBackground(position=(0, 0), images=self.images, delay=0.03)
-      self.all_sprites = pygame.sprite.Group()
-      self.all_sprites.add(self.background)
+      self.background_sprites = pygame.sprite.Group()
+      self.background_sprites.add(self.background)
       self.button_rect = pygame.Rect(self.width-75,self.height-75,25,25) #Posición del boton de ayuda COLOCAR EN LA BARRA DE JUEGO
       self.paused = False
       pygame.display.set_caption("GalactaTEC")
@@ -255,12 +261,19 @@ class game:
       self.v_axis = 0
       self.h_axis = 0
 
+
+      ## time for shooting enemy's bullets
+      self.time_since_last_shot = 0  # ms desde el último disparo
+
+
+
   def run(self):
       self.joystick_init()
       clock = pygame.time.Clock()
       while self.running:
           dt = clock.tick(game.FRAME_RATE)
           self.bonus_timer += dt
+          self.time_since_last_shot += dt
 
           if self.paused:  #Juego en Pausa
             self.paused_events()                #Manejar evento de poner o quitar pausa
@@ -268,20 +281,30 @@ class game:
             pygame.display.flip()       
           else: #Jugando Ando
             self.generate_bonus()               #Generar bonos de forma aleatoria
-            self.game_events()                  #Manejo de eventos del juego, incluir
-            self.all_sprites.update(dt)         #Update del fondo 
+            self.game_events()    
+            # Disparos de enemigos
+            self.manage_enemy_shooting()              #Manejo de eventos del juego, incluir
+            self.background_sprites.update(dt)         #Update del fondo 
             self.screen.blit(self.background.image, self.background.rect)     #Dibujar fondo
-            self.all_sprites.draw(self.screen)                                
+            self.background_sprites.draw(self.screen)                                
             self.mover_enemigos()               #Movimiento de enemigos
             keys = pygame.key.get_pressed()
             self.controlconection()             #Conexión con el control
             self.draw_and_update_all_entities(keys, self.h_axis, self.v_axis) #Dibujar todas las entidades
             self.collision_observer.update()    #Actualizar colisiones
+            self.draw_and_update_all_entities(keys, self.h_axis, self.v_axis)
+
+ 
+
             if game.POINTS_TO_ADD > 0:
               self.inst_ship.add_points(game.POINTS_TO_ADD)
               game.POINTS_TO_ADD = 0
+              # ACTUALIZAR JSON
+              # SET JSON (KEY, VALUE)
             pygame.display.flip()
             self.check_killed()
+            # IF TERMINO:
+            #   PREMIACION = INITACION DE PREMACION()
 
 
   #Setup de los joysticks
@@ -557,6 +580,8 @@ class game:
         entity.update(self.inst_ship.rect.centerx, self.inst_ship.rect.centery)
       elif isinstance(entity, BulletShip):
         entity.update()
+      elif isinstance(entity, BulletEnemy):
+         entity.update()
       entity.draw(self.screen)
     self.draw_menu_game()
   #Revisar colisiones
@@ -603,6 +628,36 @@ class game:
   def quit(self):
       self.running = False
       print("Thanks for playing!")
+
+  def manage_enemy_shooting(self):
+    if self.time_since_last_shot >= game.SHOT_ENEMY_COOLDOWN:
+        available_enemies = [(i, j) for i, row in enumerate(self.inst_enemies) 
+                             for j, enemy in enumerate(row) 
+                             if not enemy.has_shot and enemy.get_isAlive()]
+    
+        if len(available_enemies) == 0:
+          for row in self.inst_enemies:
+                    for enemy in row:
+                        enemy.has_shot = False
+          # print("Reset disparos")
+        # print(f"Enemigos disponibles: {len(available_enemies)}")
+        if available_enemies:
+            i, j = random.choice(available_enemies)
+            enemy = self.inst_enemies[i][j]
+            self.fire_enemy(enemy)
+            # print("Disparando enemigo")
+        self.time_since_last_shot = 0
+
+  def fire_enemy(self, enemy):
+      bullet_type = BulletEnemyType.CHARGED if (not enemy.charged_shot_used 
+                          and random.random() < 0.1) else BulletEnemyType.SIMPLE
+      bullet = BulletEnemy(enemy.rect.center, bullet_type)
+      self.inst_entities.append(bullet)
+      self.collision_observer.register([bullet])
+      enemy.has_shot = True
+      if bullet_type == BulletEnemyType.CHARGED:
+          enemy.charged_shot_used = True
+      
 
 
 ### BONUS
@@ -755,6 +810,8 @@ class Enemy(Collidable):
     self.pos = posx
 
     self.active = True  #Para saber si está vivo o no
+    self.has_shot = False
+    self.charged_shot_used = False
 
   
   #No la he usado aún, pero sirve para "teletransportarse"
@@ -835,19 +892,46 @@ class EnemyFactory:
 ############ Clase BulletEnemy ############
 
 class BulletEnemyType(enum.Enum):
-   SIMPLE = "Simple"
-   CHARGED = "Charged"
+   SIMPLE = "Simple Enemy Bullet"
+   CHARGED = "Charged Enemy Bullet"
 
 class BulletEnemy(Collidable):
+
+  WIDTH = 20
    
-   def __init__(self, posx, posy, bullet_type):
-     super().__init__()
+  def __init__(self, center, bullet_type=BulletEnemyType.SIMPLE):
+    super().__init__()
+
+    self.bullet_type = bullet_type
+    self.image = pygame.image.load( "Images/" + 
+                                      bullet_type.value
+                                          .lower()
+                                          .replace(" ", "_") +
+                                      ".png"
+                                    )
+    self.image = pygame.transform.scale(self.image, (BulletEnemy.WIDTH, BulletEnemy.WIDTH))  # Ajusta el tamaño de la bala
+    self.rect = self.image.get_rect()
+    self.rect.center = center
+    self.rect.y += BulletEnemy.WIDTH
+    self.active = True
+    self.isAlive = True
+
+  def update(self):
+    self.rect.y += 2
+
+    if (self.rect.y > game.SCREEN_HEIGHT-game.PADDING_MENU or 
+        self.rect.x > game.SCREEN_WIDTH or self.rect.x < 0):
+      self.kill()
 
 
 
+  def draw(self, screen):
+    if self.active:
+      screen.blit(self.image, self.rect)
 
-
-
+  def on_collision(self, other):
+    if isinstance(other, Ship):
+        self.kill()
 
 
 

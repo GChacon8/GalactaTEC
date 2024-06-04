@@ -50,7 +50,7 @@ class Collidable(Entity,ABC):
 class CollisionRules:
     def __init__(self):
         self.rules = {
-            "Ship": ["Bonus", "Enemy"],
+            "Ship": ["Bonus", "Enemy", "BulletEnemy"],
             "Enemy": ["Ship", "BulletShip"],
             "BulletShip": ["Enemy", "Ship"],
             "Bonus": ["Ship"],

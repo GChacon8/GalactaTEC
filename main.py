@@ -1,6 +1,7 @@
 import login
 import tkinter as tk
 import AnimatedGIF
+from tkinter import messagebox
 
 class main:
     def __init__(self):
@@ -17,6 +18,10 @@ class main:
         win = login.login(self.window, self.animated_gif)
         win.showLogin()
 
-
-if __name__ == "__main__":  
-    win = main()
+def show_error_message(error):
+    messagebox.showerror("Error", f"Ocurrió un error: {str(error)}")
+if __name__ == "__main__":
+    try:  
+        win = main()
+    except Exception as e:
+        show_error_message(e)
