@@ -12,13 +12,6 @@ import json
 from Enemy_movement import EnemyMovement
 from Observer import Collidable, CollisionObserver
 
-
-class galacta:
-  def __init__(self):
-    #inst_init_menu = init_menu()
-    inst_game = game()
-    inst_game.run()
-
 class Ship (Collidable):
 
   WIDTH = 80
@@ -41,7 +34,7 @@ class Ship (Collidable):
     self.rect = self.image.get_rect()
     self.rect.center = (int(game.SCREEN_WIDTH / 2)-int(0.5*Ship.WIDTH), 
                         game.SCREEN_HEIGHT-int(1.0625*Ship.WIDTH)) 
-    self.speed = 7
+    self.speed = 8
 
     self.active = True
 
@@ -101,33 +94,32 @@ class Ship (Collidable):
     elif isinstance(other, Enemy):
         if self.invulnerable_time == 0:  # Solo resta vida si no está invulnerable
             self.hit_sound.play()
-            self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
-            game.VIBRATION = True
-          
-            game.POINTS_TO_ADD += 200
+            hit = 1
             if self.shield is not None:
-               self.shield.hits -= 1
-               if self.shield.hits <= 0:
-                   self.shield.kill()
-                   self.shield = None
-            else:
-              self.life -= 1
-              ## CHANGE PLAYER
-    elif isinstance(other, BulletEnemy):
-      
-      if self.invulnerable_time == 0:  # Solo resta vida si no está invulnerable
-         self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
-         self.hit_sound.play()
-         game.VIBRATION = True
-         hit = 1 if other.type == BulletEnemyType.SIMPLE else 2
-         if self.shield is not None:
                self.shield.hits -= hit
                if self.shield.hits <= 0:
                    self.shield.kill()
                    self.shield = None
-         else:
-           self.life -= hit
-
+            else:
+              self.life -= hit
+            self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
+            game.VIBRATION = True
+            game.POINTS_TO_ADD += 200
+            ## CHANGE PLAYER
+    elif isinstance(other, BulletEnemy):
+      if self.invulnerable_time == 0:  # Solo resta vida si no está invulnerable
+        self.hit_sound.play()
+        hit = 1 if other.type == BulletEnemyType.SIMPLE else 2
+        if self.shield is not None:
+            self.shield.hits -= hit
+            if self.shield.hits <= 0:
+                self.shield.kill()
+                self.shield = None
+        else:
+          self.life -= hit
+        self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
+        game.VIBRATION = True
+        ## CHANGE PLAYER
 
             
   def get_life(self):
@@ -185,6 +177,7 @@ class game:
   POINTS_TO_ADD = 0
   SHOT_ENEMY_COOLDOWN =  2000  # ms entre disparos
   VIBRATION = False
+  CONTROLLER = False
 
   def __init__(self, key1, key2 = None):
       self.width = game.SCREEN_WIDTH
@@ -296,9 +289,8 @@ class game:
             self.mover_enemigos()               #Movimiento de enemigos
             keys = pygame.key.get_pressed()
             self.controlconection()             #Conexión con el control
-            self.draw_and_update_all_entities(keys, self.h_axis, self.v_axis) #Dibujar todas las entidades
-            self.collision_observer.update()    #Actualizar colisiones
             self.draw_and_update_all_entities(keys, self.h_axis, self.v_axis)
+            self.collision_observer.update()    #Actualizar colisiones
             self.vibration_ps4()
  
 
@@ -463,6 +455,7 @@ class game:
     # Verifica cuántos joysticks están conectados
     joystick_count = pygame.joystick.get_count()
     if joystick_count > 0:
+      game.CONTROLLER = True
       self.joystick = pygame.joystick.Joystick(0)
       self.joystick.init()
       #print(f"Joystick name: {self.joystick.get_name()}")
@@ -819,7 +812,7 @@ class game:
           enemy.charged_shot_used = True
       
   def vibration_ps4(self):
-    if game.VIBRATION:
+    if game.VIBRATION and game.CONTROLLER:
       self.joystick.rumble(1,1,1000)
       game.VIBRATION = False
      
@@ -1016,6 +1009,8 @@ class Enemy(Collidable):
     if isinstance(other, BulletShip):
       self.kill()
       Enemy.sound_enemy.play()
+    elif isinstance(other, Ship):
+       self.kill()
 
   
   def is_alive(self):
@@ -1062,12 +1057,12 @@ class BulletEnemy(Collidable):
 
   WIDTH = 20
    
-  def __init__(self, center, bullet_type=BulletEnemyType.SIMPLE):
+  def __init__(self, center, type=BulletEnemyType.SIMPLE):
     super().__init__()
 
-    self.bullet_type = bullet_type
+    self.type = type
     self.image = pygame.image.load( "Images/" + 
-                                      bullet_type.value
+                                      type.value
                                           .lower()
                                           .replace(" ", "_") +
                                       ".png"
@@ -1077,10 +1072,9 @@ class BulletEnemy(Collidable):
     self.rect.center = center
     self.rect.y += BulletEnemy.WIDTH
     self.active = True
-    self.isAlive = True
 
   def update(self):
-    self.rect.y += 2
+    self.rect.y += 4
 
     if (self.rect.y > game.SCREEN_HEIGHT-game.PADDING_MENU or 
         self.rect.x > game.SCREEN_WIDTH or self.rect.x < 0):
@@ -1092,9 +1086,9 @@ class BulletEnemy(Collidable):
     if self.active:
       screen.blit(self.image, self.rect)
 
-  def on_collision(self, other):
+  def on_collision(self, other: Collidable):
     if isinstance(other, Ship):
-        self.kill()
+        self.kill()    
 
 
 
