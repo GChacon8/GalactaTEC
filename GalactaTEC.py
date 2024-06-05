@@ -16,6 +16,7 @@ class Ship (Collidable):
 
   WIDTH = 80
   INVISIBLE_TIME = 4 # 4 segundos
+  DOUBLE_POINTS_TIME = 16 # 16 segundos
 
   def __init__(self, player, numPlayer):
     super().__init__()
@@ -54,6 +55,7 @@ class Ship (Collidable):
     self.points_multiplier = 1
 
     self.invulnerable_time = 0
+    self.double_points_time = 0
 
 
     # Aviable Bullet Type 
@@ -65,7 +67,6 @@ class Ship (Collidable):
   def update(self, keys, h_axis, v_axis):
     if self.invulnerable_time > 0:
       self.invulnerable_time -= 1
-
     if keys[pygame.K_LEFT] or h_axis<-0.5:
       self.rect.x -= self.speed
     if keys[pygame.K_RIGHT] or h_axis>0.5:
@@ -168,6 +169,7 @@ class AnimatedBackground(pygame.sprite.Sprite):
 class game:
   
   pygame.init()
+  pygame.mixer.init()
   SCREEN_WIDTH = pygame.display.Info().current_w
   SCREEN_HEIGHT = pygame.display.Info().current_h
   FRAME_RATE = 60
@@ -215,7 +217,7 @@ class game:
       #---------------------
       
       self.bullets = []
-      self.available_bonus_types = [BonusType.SHIELD]#list(BonusType)  # Lista de tipos de bonos disponibles
+      self.available_bonus_types = list(BonusType)  # Lista de tipos de bonos disponibles
       self.bonus_timer = 0
       self.bonus_interval = game.BONUS_TIME  # 30 segundos
 
@@ -231,14 +233,13 @@ class game:
       self.t = 0              
       self.running = True    
       self.movement = False   
-      self.paused = False     
+      self.paused = True   
       self.time_text = 0      #-------------------
       
 
       # Sounds
       volume = 0.10
-      self.gameMusic = pygame.mixer.Sound("Songs/music_1.mp3")
-      self.gameMusic.set_volume(0.5)
+      self.chose_song(self.level)
 
       self.sound_bonus_extra_life = pygame.mixer.Sound("sounds/extra_life.wav")
       self.sound_bonus_extra_life.set_volume(volume)
@@ -258,15 +259,15 @@ class game:
       self.player_1_Status = []
       
       self.player_2_Status = []
-      self.setup_player2()
-      
-
-
+           
       
 
 
       ## time for shooting enemy's bullets
       self.time_since_last_shot = 0  # ms desde el último disparo
+      self.message = ""
+      self.endgame = False
+      self.setup_player2()
 
 
 
@@ -281,8 +282,13 @@ class game:
 
           if self.paused:  #Juego en Pausa
             self.paused_events()                #Manejar evento de poner o quitar pausa
-            self.draw_menu_game()               #Dibujar el menú
-            pygame.display.flip()       
+            self.show_Message()
+            pygame.display.flip()  
+          elif self.endgame: #FINALIZAR EL JUEGO
+             print("FIN DEL JUEGOOOOOOOOOOOOOOOOOOOOOOO")
+             self.paused_events()
+             self.show_Message()
+             pygame.display.flip()
           else: #Jugando Ando
             self.generate_bonus()               #Generar bonos de forma aleatoria
             self.game_events()    
@@ -307,11 +313,9 @@ class game:
             pygame.display.flip()
             self.check_killed()
 
-            # AQUI VA  CAMBIO DE NIVEL
+            self.change_level()
             # MESSAGE DE FINILIZACION DE JUEGO SI LAS VIDAS =0 O SI ES TERMINO EL ULTIMO NIVEL
             self.is_time_to_change()
-            # IF TERMINO:
-            #   PREMIACION = INITACION DE PREMACION()
   
   def setup_player2(self):
       #No solo cambiar qué nave se utiliza, sino también la música y todas esas cosas
@@ -382,8 +386,10 @@ class game:
             ]
             print("setup del jugador2 porque el jugador 1 empieza")
           print("SETUP LISTO-------------------------->")
-      except:
-          pass
+          self.message = "Inicia el jugador " +str(self.turno) + " Presione la pantalla para continuar"
+      except Exception as e:
+          print(e)
+          exit()
   
   #Manejo del cambio de jugador        HAY ERROR EN CAMBIAR AL PATRÓN DE MOVIMIENTO Y COLISIONES, probar reiniciar los objetos y hacer el append y eso
   def change_player(self):
@@ -400,30 +406,29 @@ class game:
             self.setup_counter,       # INDICE 7
             self.t,                   # INDICE 8
             self.movement,             # INDICE 9
-            self.level
+            self.level                # INDICE 10
         ]
         
         # Cambiar de turno
-        self.turno = 2
-        
-        # Actualizar instancias con la información del jugador 2
-        self.inst_ship = self.player_2_Status[0]
-        self.factory = self.player_2_Status[1]
-        self.enemies = self.player_2_Status[2]
-        self.inst_enemies = self.player_2_Status[3]
-        self.inst_enemyMovement = self.player_2_Status[4]
-        self.inst_entities = self.player_2_Status[5]
-        self.collision_observer = self.player_2_Status[6]
-        self.setup_counter = self.player_2_Status[7]
-        self.t = self.player_2_Status[8]
-        self.movement = self.player_2_Status[9]
-        self.level = self.player_2_Status[10]
-        
-        # Actualizar entidades para el jugador 2
-        #self.inst_entities = []
-        #self.inst_entities.append(self.inst_ship)
-        #self.inst_entities.extend(self.enemies[1])
-        
+        if self.player_2_Status[0].life >0 and self.player_2_Status[10] < 3: 
+          self.turno = 2
+          # Actualizar instancias con la información del jugador 2
+          self.inst_ship = self.player_2_Status[0]
+          self.factory = self.player_2_Status[1]
+          self.enemies = self.player_2_Status[2]
+          self.inst_enemies = self.player_2_Status[3]
+          self.inst_enemyMovement = self.player_2_Status[4]
+          self.inst_entities = self.player_2_Status[5]
+          self.collision_observer = self.player_2_Status[6]
+          self.setup_counter = self.player_2_Status[7]
+          self.t = self.player_2_Status[8]
+          self.movement = self.player_2_Status[9]
+          self.level = self.player_2_Status[10]
+
+
+          # Acutaliza la musica
+          self.chose_song(self.level)
+
       elif self.turno == 2:
         # Actualizar la información del juego actual para el jugador 2
         self.player_2_Status = [
@@ -440,32 +445,59 @@ class game:
             self.level
         ]
         
+        if self.player_1_Status[0].life >0 and self.player_1_Status[10] < 3:
         # Cambiar de turno
-        self.turno = 1
-        
-        # Actualizar instancias con la información del jugador 1
-        self.inst_ship = self.player_1_Status[0]
-        self.factory = self.player_1_Status[1]
-        self.enemies = self.player_1_Status[2]
-        self.inst_enemies = self.player_1_Status[3]
-        self.inst_enemyMovement = self.player_1_Status[4]
-        self.inst_entities = self.player_1_Status[5]
-        self.collision_observer = self.player_1_Status[6]
-        self.setup_counter = self.player_1_Status[7]
-        self.t = self.player_1_Status[8]
-        self.movement = self.player_1_Status[9]
-        self.level = self.player_1_Status[10]
-        
-        # Actualizar entidades para el jugador 1
-        #self.inst_entities = []
-        #self.inst_entities.append(self.inst_ship)
-        #self.inst_entities.extend(self.enemies[1])
+          self.turno = 1
+          # Actualizar instancias con la información del jugador 1
+          self.inst_ship = self.player_1_Status[0]
+          self.factory = self.player_1_Status[1]
+          self.enemies = self.player_1_Status[2]
+          self.inst_enemies = self.player_1_Status[3]
+          self.inst_enemyMovement = self.player_1_Status[4]
+          self.inst_entities = self.player_1_Status[5]
+          self.collision_observer = self.player_1_Status[6]
+          self.setup_counter = self.player_1_Status[7]
+          self.t = self.player_1_Status[8]
+          self.movement = self.player_1_Status[9]
+          self.level = self.player_1_Status[10]
+
+
+          # Acutaliza la musica
+          self.chose_song(self.level)
     
       elif self.turno == 0:
         return 0  # Caso cuando hay un solo jugador, y prevenir cambios
       
-      print("Es el turno del jugador->>>", self.turno)
 
+      if self.player_1_Status[0].life <= 0 or self.player_2_Status[0].life <= 0:
+        dato = 2 if self.turno == 1 else 1
+        self.message = (
+                        "El jugador " + str (dato) + 
+                        " ha perdido.  Turno del jugador " + 
+                        str(self.turno) + 
+                        "Presione la pantalla para continuar"
+                        )
+      else:
+        self.message = "Es el turno del jugador " +str(self.turno) + " Presione la pantalla para continuar"
+
+      # listo
+      if self.player_1_Status[0].life <= 0 and self.player_2_Status[0].life <= 0:
+         self.message = "FIN DEL JUEGO NADIE TIENE VIDAS"
+         self.endgame = True
+      # listo
+      elif self.player_1_Status[10] >= 3 and self.player_2_Status[10] >= 3:
+         self.message = "FIN DEL JUEGO  LOS 2 JUGADORES SE ACABARON LOS NIVELES"
+         self.endgame = True
+      # listo
+      elif self.player_1_Status[0].life <= 0 and self.player_2_Status[10] >= 3:
+         self.message = "FIN DEL JUEGO EL JUGADOR 1 NO TIENE VIDAS y JUGADOR 2 ACABO LOS NIVELES"
+         self.endgame = True
+      # listo
+      elif self.player_2_Status[0].life <= 0 and self.player_1_Status[10] >= 3:
+         self.message = "FIN DEL JUEGO EL JUGADOR 2 NO TIENE VIDAS y JUGADOR 1 ACABO LOS NIVELES"
+         self.endgame = True
+      
+      
   #Setup de los joysticks
   def joystick_init(self):
      # Inicializa los joysticks
@@ -479,10 +511,12 @@ class game:
       #print(f"Joystick name: {self.joystick.get_name()}")
   #Permitir quitar por medio del botón
   def paused_events(self):
+    
     for event in pygame.event.get():
       if event.type == pygame.MOUSEBUTTONDOWN:
+        self.paused = False
         mouse_pos = pygame.mouse.get_pos()
-        if self.button_rect.collidepoint(mouse_pos):
+        if self.button_rect.collidepoint(mouse_pos):        #Revisión de presionar el boton rojo
           self.paused = False
       elif event.type == pygame.JOYBUTTONDOWN:
         if event.button == 6:
@@ -673,12 +707,11 @@ class game:
     self.screen.blit(text_surface, (text_x, text_y))
   #Dibujar el tiempo
   def draw_time(self, font, text_color):
-    if not self.paused:
-      self.time_text = f"Time: {pygame.time.get_ticks() // 1000}"
-      text_surface = font.render(self.time_text, True, text_color)
-      text_x = game.SCREEN_WIDTH - int(game.SCREEN_WIDTH * (1-0.25))
-      text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
-      self.screen.blit(text_surface, (text_x, text_y))
+    self.time_text = f"Time: {pygame.time.get_ticks() // 1000}"
+    text_surface = font.render(self.time_text, True, text_color)
+    text_x = game.SCREEN_WIDTH - int(game.SCREEN_WIDTH * (1-0.25))
+    text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
+    self.screen.blit(text_surface, (text_x, text_y))
   #Dibujar los puntos
   def draw_points(self, font, text_color):
     if self.inst_ship.points_multiplier != 1:
@@ -767,8 +800,6 @@ class game:
                   for sublist in self.inst_enemies:
                       if entity in sublist:
                           sublist.remove(entity)
-                
-
   #Dibujar texto multilinea
   def draw_text_multiline(surface, text, x_0, y_0, max_x, font, color):
     words = text.split()
@@ -799,7 +830,7 @@ class game:
   def quit(self):
       self.running = False
       print("Thanks for playing!")
-
+  #Manejo de los disparos de los enemigos
   def manage_enemy_shooting(self):
     if self.time_since_last_shot >= game.SHOT_ENEMY_COOLDOWN:
         available_enemies = [(i, j) for i, row in enumerate(self.inst_enemies) 
@@ -818,32 +849,107 @@ class game:
             self.fire_enemy(enemy)
             # print("Disparando enemigo")
         self.time_since_last_shot = 0
-
+  #Disparo del enemigo
   def fire_enemy(self, enemy):
       bullet_type = BulletEnemyType.CHARGED if (not enemy.charged_shot_used 
                           and random.random() < 0.1) else BulletEnemyType.SIMPLE
-      bullet = BulletEnemy(enemy.rect.center, bullet_type)
+      bullet = BulletEnemy(enemy.rect.center, bullet_type, self.level)
       self.inst_entities.append(bullet)
       self.collision_observer.register([bullet])
       enemy.has_shot = True
       if bullet_type == BulletEnemyType.CHARGED:
           enemy.charged_shot_used = True
-      
+  #Vibración del control
   def vibration_ps4(self):
     if game.VIBRATION and game.CONTROLLER:
       self.joystick.rumble(1,1,1000)
       game.VIBRATION = False
-
+  #Detectar cuando hay que realizar el cambio de jugador
   def is_time_to_change(self):
+    if game.CHANGE_PLAYER and self.key2 is not None:
+      game.CHANGE_PLAYER = False
+      self.change_player()
+      self.paused = True
+    else:
       if self.key2 is None:
-        return
-      else:
-         if game.CHANGE_PLAYER:
-            game.CHANGE_PLAYER = False
-            self.change_player()
-     
-### BONUS
+        if self.inst_ship.life <= 0:
+          self.message = "FIN DEL JUEGO EL JUGADOR NO TIENE VIDAS"
+          self.endgame = True
+        elif self.level >= 3:
+           self.message = "FIN DEL JUEGO SE ACABARON LOS NIVELES"
+           self.endgame = True
+      elif self.key2 is not None and self.level >= 3:
+         game.CHANGE_PLAYER = True
+         
+  #Mensaje "Presione para continuar" y que cambie el jugador
+  def show_Message(self):
+    self.background_sprites.draw(self.screen)     
+    self.inst_ship.draw(self.screen)
+    self.draw_menu_game()
+    font = pygame.font.Font("fonts/GenericTechno.otf", 25)
+    text_surface = font.render(self.message, True, (255, 255, 255))
+    text_x = (game.SCREEN_WIDTH - text_surface.get_rect().width) / 2
+    text_y = (game.SCREEN_HEIGHT - text_surface.get_rect().height) / 2
+    self.screen.blit(text_surface, (text_x, text_y))
 
+    #print("JUGADOR 1: ",self.player_1_Status[0].life)
+    #print("JUGADOR 2: ",self.player_2_Status[0].life)
+
+
+
+  def chose_song(self, level):
+    if pygame.mixer.music.get_busy():
+        pygame.mixer.music.stop()
+    pygame.mixer.music.load(
+        "Songs/music_" + str(level) + ".mp3"
+    )
+    pygame.mixer.music.set_volume(0.3)
+    pygame.mixer.music.play(-1)
+
+  def change_level(self):
+    exist_enemies = False
+    for i in self.inst_entities:
+      if isinstance(i, Enemy):
+        exist_enemies = True
+        break
+    if exist_enemies:
+      return
+    temp_level = self.level
+    temp_level += 1
+    
+    self.level = temp_level if temp_level < 3 else 3
+    if self.level < 3:
+      self.chose_song(self.level)
+      self.factory = EnemyFactory(self.SCREEN_WIDTH)         #---------------------
+      self.enemies = self.factory.create_enemies(6, 6, self.level)            #---------------------
+      self.inst_enemies = self.enemies[0]                    #---------------------
+      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,self.patrones[self.level])#se elige el patron de vuelo
+      #---------------------
+      
+      self.bullets = []
+      self.available_bonus_types = list(BonusType)  # Lista de tipos de bonos disponibles
+      self.bonus_timer = 0
+      self.bonus_interval = game.BONUS_TIME  # 30 segundos
+
+      self.inst_ship.shield = None          
+      self.inst_ship.bonus_colleted = []   
+      self.inst_entities = []                           
+      self.inst_entities.append(self.inst_ship)         
+      self.inst_entities.extend(self.enemies[1])
+
+      # Observer
+      self.collision_observer = CollisionObserver()     
+      self.collision_observer.register(self.inst_entities)  
+
+      self.setup_counter = 0 
+      self.t = 0
+      self.movement = False 
+
+
+
+
+
+### BONUS
 class BonusType(enum.Enum):
   # CHASING_BULLET = "Chasing Bullet"
   # EXPANDING_BULLET = "Expanding Bullet"
@@ -983,7 +1089,7 @@ class Enemy(Collidable):
 
   def __init__(self,posx,posy, level):
     super().__init__()
-    self.image = pygame.image.load("Images/enemy.png")
+    self.image = pygame.image.load("Images/enemy_" + str(level) + ".png")
     self.image = pygame.transform.smoothscale(self.image, (40, 40))
     self.rect = self.image.get_rect()
     self.rect.x = posx
@@ -1085,7 +1191,7 @@ class BulletEnemy(Collidable):
 
   WIDTH = 20
    
-  def __init__(self, center, type=BulletEnemyType.SIMPLE):
+  def __init__(self, center, type, level):
     super().__init__()
 
     self.type = type
@@ -1093,10 +1199,24 @@ class BulletEnemy(Collidable):
                                       type.value
                                           .lower()
                                           .replace(" ", "_") +
+                                      "_" + str(level) +
                                       ".png"
                                     )
     self.image = pygame.transform.scale(self.image, (BulletEnemy.WIDTH, BulletEnemy.WIDTH))  # Ajusta el tamaño de la bala
     self.rect = self.image.get_rect()
+
+    sound = pygame.mixer.Sound("sounds/" +
+                                      type.value
+                                          .lower()
+                                          .replace(" ", "_") +
+                                      "_" + str(level) +
+                               ".wav")
+
+    sound.set_volume(0.5)
+    sound.play()
+
+
+
     self.rect.center = center
     self.rect.y += BulletEnemy.WIDTH
     self.active = True
@@ -1116,7 +1236,8 @@ class BulletEnemy(Collidable):
 
   def on_collision(self, other: Collidable):
     if isinstance(other, Ship):
-        self.kill()    
+        if other.invulnerable_time <= 0:
+          self.kill()    
 
 
 
