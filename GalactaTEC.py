@@ -272,6 +272,8 @@ class game:
 
 
   def run(self):
+      puntaje1 = 0
+      puntaje2 = 0
       self.joystick_init()
       clock = pygame.time.Clock()
       self.time_text = 0
@@ -285,10 +287,15 @@ class game:
             self.show_Message()
             pygame.display.flip()  
           elif self.endgame: #FINALIZAR EL JUEGO
-             print("FIN DEL JUEGOOOOOOOOOOOOOOOOOOOOOOO")
              self.paused_events()
              self.show_Message()
-             pygame.display.flip()
+             if self.key2 is not None:
+              puntaje1  = self.player_1_Status[0].points
+              puntaje2 = self.player_2_Status[0].points
+             else:
+                puntaje1 = self.inst_ship.points
+             pygame.quit()
+             break
           else: #Jugando Ando
             self.generate_bonus()               #Generar bonos de forma aleatoria
             self.game_events()    
@@ -316,7 +323,11 @@ class game:
             self.change_level()
             # MESSAGE DE FINILIZACION DE JUEGO SI LAS VIDAS =0 O SI ES TERMINO EL ULTIMO NIVEL
             self.is_time_to_change()
-  
+      if self.key2 is not None:
+         print("PUNTUACION 1: ",puntaje1," PUNTUACION 2: ",puntaje2)
+      else:
+        print("PUNTUACION: ",puntaje1)
+      # LLAMAR CORACION
   def setup_player2(self):
       #No solo cambiar qué nave se utiliza, sino también la música y todas esas cosas
       try:
