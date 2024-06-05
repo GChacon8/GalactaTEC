@@ -50,11 +50,12 @@ class Collidable(Entity,ABC):
 class CollisionRules:
     def __init__(self):
         self.rules = {
-            "Ship": ["Bonus", "Enemy"],
+            "Ship": ["Bonus", "Enemy", "BulletEnemy"],
             "Enemy": ["Ship", "BulletShip"],
-            "BulletShip": ["Enemy", "Ship"],
+            "BulletShip": ["Enemy"],
             "Bonus": ["Ship"],
             "Shield": [""],
+            "BulletEnemy": ["Ship"],
             
         }
 
@@ -99,6 +100,8 @@ class CollisionObserver:
                                 self.collidables.remove(collidable2)
                             if cond1== False or cond2== False:
                                 return
-        except:
-            pass
-
+        except Exception as e:
+            print(e)
+            print("HUBO UN ERROR")
+            print(f"colliable is {collidable1.__class__.__name__}")
+            print(f"colliable is {collidable2.__class__.__name__}")
