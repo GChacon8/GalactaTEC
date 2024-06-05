@@ -303,6 +303,7 @@ class game:
               self.inst_ship.add_points(game.POINTS_TO_ADD)
               game.POINTS_TO_ADD = 0
               # ACTUALIZAR JSON
+              self.updateJson()
               # SET JSON (KEY, VALUE)
             pygame.display.flip()
             self.check_killed()
@@ -312,6 +313,23 @@ class game:
             self.is_time_to_change()
             # IF TERMINO:
             #   PREMIACION = INITACION DE PREMACION()
+  
+  # Actualizacion de los puntos en la base de datos
+  def updateJson(self):
+    with open("data.json") as json_file:
+            data = json.load(json_file)
+
+    user1 = {'highscore': self.player_1_Status[0].points}
+    user2 = {'highscore': self.player_2_Status[0].points}
+            
+    for usuario in data:
+      if usuario["key"] == self.key1:
+         usuario.update(user1)
+      elif usuario["key"] == self.key2:
+         usuario.update(user2)
+     
+    with open("data.json", "w") as json_file:
+      json.dump(data, json_file, indent=4)
   
   def setup_player2(self):
       #No solo cambiar qué nave se utiliza, sino también la música y todas esas cosas

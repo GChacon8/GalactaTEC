@@ -2,6 +2,7 @@ import login
 import tkinter as tk
 import AnimatedGIF
 from tkinter import messagebox
+import ceremony
 
 class main:
     def __init__(self):
@@ -15,11 +16,10 @@ class main:
         self.animated_gif = AnimatedGIF.AnimatedGIF(self.window, gif_path)
         self.animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
 
-        win = login.login(self.window, self.animated_gif)
-        win.showLogin()
+        #win = login.login(self.window, self.animated_gif)
+        #win.showLogin()
 
-        #win = ceremony.ceremony(self.window, self.animated_gif, 2, 3)
-
+        win = ceremony.ceremony(self.window, self.animated_gif, 2, 3)
 
 
 def show_error_message(error):
