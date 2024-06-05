@@ -54,7 +54,6 @@ class login:
         self.window.mainloop()
 
     def goToRecover(self):
-        print("entra")
         self.clear_win()
         recover.Recover(self.window, self.animated_gif)
 
@@ -72,27 +71,35 @@ class login:
 
         # Verificar las credenciales con los datos del archivo JSON
         for usuario in data:
-            if usuario["username"] == username and usuario["password"] == password:
-                print(self.player)
-                if self.player == "player1":
-                        self.clear_win()
-                        self.key = usuario["key"]   # llave del usuario que inicia sesion
-                        win = menu.init_menu(self.window, self.animated_gif, self.key)
-                        win.showMenu()
-                        return
-                elif self.player == "player2":
-                        print("Player1: ", self.key)
-                        print("Player2: ", usuario["key"])
-                        if(self.key == usuario["key"]): # se intenta iniciar sesion dos veces en la misma cuenta
-                             messagebox.showwarning("Error", "Your session on this account is already active")
-                        else:
+            if usuario["username"] == username: # Existe el usuario en la DB
+                if usuario["password"] == password: # La contraseña coindide con el usuario
+                    print(self.player)
+                    if self.player == "player1":
                             self.clear_win()
-                            multiplayer = menu.init_menu(self.window, self.animated_gif, self.key)
-                            multiplayer.multiplayer(self.key, usuario["key"])
-                            multiplayer.showMenu()
+                            self.key = usuario["key"]   # llave del usuario que inicia sesion
+                            win = menu.init_menu(self.window, self.animated_gif, self.key)
+                            win.showMenu()
+                            return
+                    elif self.player == "player2":
+                            print("Player1: ", self.key)
+                            print("Player2: ", usuario["key"])
+                            if(self.key == usuario["key"]): # se intenta iniciar sesion dos veces en la misma cuenta
+                                messagebox.showwarning("Error", "Your session on this account is already active")
+                                return
+                            else:
+                                self.clear_win()
+                                multiplayer = menu.init_menu(self.window, self.animated_gif, self.key)
+                                multiplayer.multiplayer(self.key, usuario["key"])
+                                multiplayer.showMenu()
+                                return
                 else:
-                     # Si no se encuentra el usuario en el archivo JSON o las credenciales son incorrectas
-                    messagebox.showerror("Error", "Wrong credentials. Please try again.")
+                    messagebox.showwarning("Error", "Password does not match username")
+                    return
+        
+            
+        # Si no se encuentra el usuario en el archivo JSON o las credenciales son incorrectas
+        messagebox.showerror("Error", "Wrong credentials. Please try again.")
+        return
 
     def createUser(self):
         import newUser

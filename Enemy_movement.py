@@ -82,11 +82,15 @@ class EnemyMovement:
     def pattern_3(self):        
         #self.pattern_1()  #Se puede seleccionar el patrón 1 o 2 para que vaya movimiento
         if self.contador == 0:
-            enemigos = [j for i in self.inst_enemies for j in i if j.is_alive()]
-            self.enemigo_random = random.choice(enemigos)
-            self.y_coord_inicial = self.enemigo_random.get_y_coords()
-            self.goingdown = True
-            self.contador = 1 #cambiar el contador para que salga de esta condicin
+            try:
+                enemigos = [j for i in self.inst_enemies for j in i if j.is_alive()]
+                self.enemigo_random = random.choice(enemigos)
+                self.y_coord_inicial = self.enemigo_random.get_y_coords()
+                self.goingdown = True
+                self.contador = 1 #cambiar el contador para que salga de esta condicin
+            except:
+                # print("No hay enemigos vivos")
+                pass
     
         elif self.enemigo_random.get_y_coords() < self.screenHeight-100 and self.goingdown:
             self.enemigo_random.move_down(10)

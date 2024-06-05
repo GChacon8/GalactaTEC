@@ -2,6 +2,7 @@ import login
 import tkinter as tk
 import AnimatedGIF
 from tkinter import messagebox
+import ceremony
 
 class main:
     def __init__(self):
@@ -17,6 +18,9 @@ class main:
 
         win = login.login(self.window, self.animated_gif)
         win.showLogin()
+
+        # win = ceremony.ceremony(self.window, self.animated_gif, 2, 3)
+
 
 def show_error_message(error):
     messagebox.showerror("Error", f"Ocurrió un error: {str(error)}")
