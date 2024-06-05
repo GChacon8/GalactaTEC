@@ -218,7 +218,7 @@ class game:
       #---------------------
       
       self.bullets = []
-      self.available_bonus_types = [BonusType.SHIELD]#list(BonusType)  # Lista de tipos de bonos disponibles
+      self.available_bonus_types = list(BonusType)  # Lista de tipos de bonos disponibles
       self.bonus_timer = 0
       self.bonus_interval = game.BONUS_TIME  # 30 segundos
 
@@ -309,7 +309,7 @@ class game:
             pygame.display.flip()
             self.check_killed()
 
-            # AQUI VA  CAMBIO DE NIVEL
+            self.change_level()
             # MESSAGE DE FINILIZACION DE JUEGO SI LAS VIDAS =0 O SI ES TERMINO EL ULTIMO NIVEL
             self.is_time_to_change()
             # IF TERMINO:
@@ -319,7 +319,7 @@ class game:
       #No solo cambiar qué nave se utiliza, sino también la música y todas esas cosas
       try:
           if self.turno == 2:
-            temp_level = 2
+            temp_level = 0
             # Creación de una instancia de Ship y EnemyFactory
             temp_inst_ship = Ship(self.key1, 1)             #INDICE 0
             temp_factory = EnemyFactory(self.SCREEN_WIDTH)  #INDICE 1
@@ -352,7 +352,7 @@ class game:
 
             print("setup del jugador1 porque el jugador 2 empieza")
           elif self.turno == 1:
-            temp_level = 2
+            temp_level = 0
             temp_inst_ship = Ship(self.key2, 2)             #INDICE 0
             temp_factory = EnemyFactory(self.SCREEN_WIDTH)  #INDICE 1
             temp_enemies = temp_factory.create_enemies(6, 6, temp_level)  #INDICE 2
@@ -384,8 +384,9 @@ class game:
             ]
             print("setup del jugador2 porque el jugador 1 empieza")
           print("SETUP LISTO-------------------------->")
-      except:
-          pass
+      except Exception as e:
+          print(e)
+          exit()
   
   #Manejo del cambio de jugador        HAY ERROR EN CAMBIAR AL PATRÓN DE MOVIMIENTO Y COLISIONES, probar reiniciar los objetos y hacer el append y eso
   def change_player(self):
@@ -853,8 +854,52 @@ class game:
         pygame.mixer.music.load(
             "Songs/music_" + str(level) + ".mp3"
         )
-        pygame.mixer.music.set_volume(0.4)
+        pygame.mixer.music.set_volume(0.3)
         pygame.mixer.music.play(-1)
+
+  def change_level(self):
+    exist_enemies = False
+    for i in self.inst_entities:
+      if isinstance(i, Enemy):
+        exist_enemies = True
+        break
+    if exist_enemies:
+      return
+    temp_level = self.level
+    temp_level += 1
+    self.level = temp_level if temp_level < 3 else 3
+    if self.level < 3:
+      self.chose_song(self.level)
+      self.factory = EnemyFactory(self.SCREEN_WIDTH)         #---------------------
+      self.enemies = self.factory.create_enemies(6, 6, self.level)            #---------------------
+      self.inst_enemies = self.enemies[0]                    #---------------------
+      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,self.patrones[self.level])#se elige el patron de vuelo
+      #---------------------
+      
+      self.bullets = []
+      self.available_bonus_types = list(BonusType)  # Lista de tipos de bonos disponibles
+      self.bonus_timer = 0
+      self.bonus_interval = game.BONUS_TIME  # 30 segundos
+
+      self.inst_entities = []                           
+      self.inst_entities.append(self.inst_ship)         
+      self.inst_entities.extend(self.enemies[1])             
+
+      # Observer
+      self.collision_observer = CollisionObserver()     
+      self.collision_observer.register(self.inst_entities)  
+
+      self.setup_counter = 0 
+      self.t = 0
+      self.movement = False 
+
+
+
+  
+    
+    
+
+
 ### BONUS
 
 class BonusType(enum.Enum):
@@ -1143,7 +1188,8 @@ class BulletEnemy(Collidable):
 
   def on_collision(self, other: Collidable):
     if isinstance(other, Ship):
-        self.kill()    
+        if other.invulnerable_time <= 0:
+          self.kill()    
 
 
 
