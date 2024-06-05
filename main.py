@@ -18,6 +18,10 @@ class main:
         win = login.login(self.window, self.animated_gif)
         win.showLogin()
 
+        #win = ceremony.ceremony(self.window, self.animated_gif, 2, 3)
+
+
+
 def show_error_message(error):
     messagebox.showerror("Error", f"Ocurrió un error: {str(error)}")
 if __name__ == "__main__":

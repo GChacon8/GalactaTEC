@@ -74,7 +74,6 @@ class Recover:
 
         if self.verify_password(password) == False:
             messagebox.showwarning("Error", "Password must have:\n- Minimum 7 characters\n- You must use at least one capital letter\n- You must use at least one special symbol\n- You must use at least one number\n- You must use at least one lowercase letter")
-            return
 
         with open("data.json") as json_file:
             data = json.load(json_file)
@@ -86,10 +85,10 @@ class Recover:
         with open("data.json", "w") as json_file:
             json.dump(data, json_file, indent=4)
 
-        messagebox.showinfo("Password updated", "Your password has been changed successfully")
         self.clear_win
         import login
         login.login(self.window, self.animated_gif)
+        messagebox.showinfo("Password updated", "Your password has been changed successfully")
 
     def verifyEmail(self):
         self.email = self.entry_email.get()
@@ -102,6 +101,7 @@ class Recover:
         for usuario in data:
             if usuario["email"] == self.email:
                 self.sendEmail()
+            
 
             
     def generate_code(self):
@@ -159,6 +159,8 @@ class Recover:
         return True
     
     def clear_win(self):
+        print("in")
         for widget in self.window.winfo_children():
             if widget != self.animated_gif:
                 widget.destroy()
+
