@@ -16,6 +16,7 @@ class Ship (Collidable):
 
   WIDTH = 80
   INVISIBLE_TIME = 4 # 4 segundos
+  DOUBLE_POINTS_TIME = 16 # 16 segundos
 
   def __init__(self, player, numPlayer):
     super().__init__()
@@ -54,6 +55,7 @@ class Ship (Collidable):
     self.points_multiplier = 1
 
     self.invulnerable_time = 0
+    self.double_points_time = 0
 
 
     # Aviable Bullet Type 
@@ -168,6 +170,7 @@ class AnimatedBackground(pygame.sprite.Sprite):
 class game:
   
   pygame.init()
+  pygame.mixer.init()
   SCREEN_WIDTH = pygame.display.Info().current_w
   SCREEN_HEIGHT = pygame.display.Info().current_h
   FRAME_RATE = 60
@@ -237,8 +240,7 @@ class game:
 
       # Sounds
       volume = 0.10
-      self.gameMusic = pygame.mixer.Sound("Songs/music_1.mp3")
-      self.gameMusic.set_volume(0.5)
+      self.chose_song(self.level)
 
       self.sound_bonus_extra_life = pygame.mixer.Sound("sounds/extra_life.wav")
       self.sound_bonus_extra_life.set_volume(volume)
@@ -317,7 +319,7 @@ class game:
       #No solo cambiar qué nave se utiliza, sino también la música y todas esas cosas
       try:
           if self.turno == 2:
-            temp_level = 0
+            temp_level = 2
             # Creación de una instancia de Ship y EnemyFactory
             temp_inst_ship = Ship(self.key1, 1)             #INDICE 0
             temp_factory = EnemyFactory(self.SCREEN_WIDTH)  #INDICE 1
@@ -350,7 +352,7 @@ class game:
 
             print("setup del jugador1 porque el jugador 2 empieza")
           elif self.turno == 1:
-            temp_level = 0
+            temp_level = 2
             temp_inst_ship = Ship(self.key2, 2)             #INDICE 0
             temp_factory = EnemyFactory(self.SCREEN_WIDTH)  #INDICE 1
             temp_enemies = temp_factory.create_enemies(6, 6, temp_level)  #INDICE 2
@@ -418,6 +420,7 @@ class game:
         self.t = self.player_2_Status[8]
         self.movement = self.player_2_Status[9]
         self.level = self.player_2_Status[10]
+        self.chose_song(self.level)
         
         # Actualizar entidades para el jugador 2
         #self.inst_entities = []
@@ -455,6 +458,8 @@ class game:
         self.t = self.player_1_Status[8]
         self.movement = self.player_1_Status[9]
         self.level = self.player_1_Status[10]
+        self.chose_song(self.level)
+
         
         # Actualizar entidades para el jugador 1
         #self.inst_entities = []
@@ -822,7 +827,7 @@ class game:
   def fire_enemy(self, enemy):
       bullet_type = BulletEnemyType.CHARGED if (not enemy.charged_shot_used 
                           and random.random() < 0.1) else BulletEnemyType.SIMPLE
-      bullet = BulletEnemy(enemy.rect.center, bullet_type)
+      bullet = BulletEnemy(enemy.rect.center, bullet_type, self.level)
       self.inst_entities.append(bullet)
       self.collision_observer.register([bullet])
       enemy.has_shot = True
@@ -842,6 +847,14 @@ class game:
             game.CHANGE_PLAYER = False
             self.change_player()
      
+  def chose_song(self, level):
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.stop()
+        pygame.mixer.music.load(
+            "Songs/music_" + str(level) + ".mp3"
+        )
+        pygame.mixer.music.set_volume(0.4)
+        pygame.mixer.music.play(-1)
 ### BONUS
 
 class BonusType(enum.Enum):
@@ -983,7 +996,7 @@ class Enemy(Collidable):
 
   def __init__(self,posx,posy, level):
     super().__init__()
-    self.image = pygame.image.load("Images/enemy.png")
+    self.image = pygame.image.load("Images/enemy_" + str(level) + ".png")
     self.image = pygame.transform.smoothscale(self.image, (40, 40))
     self.rect = self.image.get_rect()
     self.rect.x = posx
@@ -1085,7 +1098,7 @@ class BulletEnemy(Collidable):
 
   WIDTH = 20
    
-  def __init__(self, center, type=BulletEnemyType.SIMPLE):
+  def __init__(self, center, type, level):
     super().__init__()
 
     self.type = type
@@ -1093,10 +1106,24 @@ class BulletEnemy(Collidable):
                                       type.value
                                           .lower()
                                           .replace(" ", "_") +
+                                      "_" + str(level) +
                                       ".png"
                                     )
     self.image = pygame.transform.scale(self.image, (BulletEnemy.WIDTH, BulletEnemy.WIDTH))  # Ajusta el tamaño de la bala
     self.rect = self.image.get_rect()
+
+    sound = pygame.mixer.Sound("sounds/" +
+                                      type.value
+                                          .lower()
+                                          .replace(" ", "_") +
+                                      "_" + str(level) +
+                               ".wav")
+
+    sound.set_volume(0.5)
+    sound.play()
+
+
+
     self.rect.center = center
     self.rect.y += BulletEnemy.WIDTH
     self.active = True
