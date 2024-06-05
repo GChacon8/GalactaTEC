@@ -9,7 +9,7 @@
         "ship": "Images/spaceship.png",
         "music": "",
         "highscore": "1000",
-        "lives": 1
+        "lastScore": 0
     },
     {
         "key": 2,
@@ -17,23 +17,23 @@
         "password": "Ab1234!",
         "full_name": "Valeria Morales",
         "email": "valemorales07@estudiantec.cr",
-        "photo": "Images/pp.png",
+        "photo": "Images/pp3.jpg",
         "ship": "Images/ships/ship4.png",
         "music": "",
-        "highscore": "2000",
-        "lives": 3
+        "highscore": "3400",
+        "lastScore": 0
     },
     {
         "key": 3,
         "username": "giank",
         "password": "Ab1234!",
         "full_name": "Giancarlo",
-        "email": "",
-        "photo": "Images/pp2.png",
-        "ship": "Images/ships/ship1.png",
+        "email": "valeriamorales40@gmail.com",
+        "photo": "Images/pp4.jpg",
+        "ship": "Images/ships/ship2.png",
         "music": null,
-        "highscore": "3000",
-        "lives": 5
+        "highscore": "5600",
+        "lastScore": 0
     },
     {
         "key": 4,
@@ -47,7 +47,7 @@
             "D:/Tec/Cursos/Modelado/GalactaTEC/Songs/I Don't Care - VIRA.mp3"
         ],
         "highscore": "9000",
-        "lives": 4
+        "lastScore": 0
     },
     {
         "key": 5,
@@ -55,10 +55,10 @@
         "password": "ABCdef5@",
         "full_name": "Vale M",
         "email": "valeriamorales40@gmail.com",
-        "photo": null,
+        "photo": "Images/pp.png",
         "ship": "Images/ships/ship3.png",
         "music": null,
-        "highscore": "0",
-        "lives": 2
+        "highscore": "1400",
+        "lastScore": 1400
     }
 ]

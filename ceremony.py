@@ -1,8 +1,9 @@
+import time
 import tkinter as tk
 import json
 from PIL import Image, ImageTk
-from tkinter import filedialog
 import pygame
+import hallofFame
 
 class ceremony:
     def __init__(self, window, animated_gif, key1, key2):
@@ -83,15 +84,28 @@ class ceremony:
         self.pic2.image = ppPhoto2
 
         self.play_music(song_list)
+
         self.window.mainloop()
+
+
+    def goToHall(self):
         pygame.mixer.quit()
-        
+        self.clear_win()
+        hall = hallofFame.hallofFame(self.window, self.animated_gif, self.key1)
+        hall.key1 = self.key1
+        hall.key2 = self.key2
+
 
     # Función para reproducir música
     def play_music(self, song):
         if song:
             pygame.mixer.music.load(song)  
             pygame.mixer.music.play(-1)  # Reproducir en bucle
+
+    def clear_win(self):
+        for widget in self.window.winfo_children():
+            if widget != self.animated_gif:
+                widget.destroy()
 
 
 
