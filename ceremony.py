@@ -37,7 +37,7 @@ class ceremony:
                 self.pp2 = user["photo"]
                 self.user2 = user["username"]
 
-        if(self.score1 < self.score2):
+        if(int(self.score1) < int(self.score2)):
             self.score1, self.score2 = self.score2, self.score1
             self.pp1, self.pp2 = self.pp2, self.pp1
             self.user1, self.user2 = self.user2, self.user1
