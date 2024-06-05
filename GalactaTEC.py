@@ -102,10 +102,10 @@ class Ship (Collidable):
                    self.shield = None
             else:
               self.life -= hit
+              game.CHANGE_PLAYER = True
             self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
             game.VIBRATION = True
             game.POINTS_TO_ADD += 200
-            ## CHANGE PLAYER
     elif isinstance(other, BulletEnemy):
       if self.invulnerable_time == 0:  # Solo resta vida si no está invulnerable
         self.hit_sound.play()
@@ -117,9 +117,9 @@ class Ship (Collidable):
                 self.shield = None
         else:
           self.life -= hit
+          game.CHANGE_PLAYER = True
         self.invulnerable_time = Ship.INVISIBLE_TIME * game.FRAME_RATE  # 4 segundos de invulnerabilidad
         game.VIBRATION = True
-        ## CHANGE PLAYER
 
             
   def get_life(self):
@@ -178,8 +178,14 @@ class game:
   SHOT_ENEMY_COOLDOWN =  2000  # ms entre disparos
   VIBRATION = False
   CONTROLLER = False
+  CHANGE_PLAYER = False
 
   def __init__(self, key1, key2 = None):
+      self.level = 0
+      self.patrones = [3,2,1]
+
+
+
       self.width = game.SCREEN_WIDTH
       self.height = game.SCREEN_HEIGHT
       self.screen = pygame.display.set_mode((self.width, self.height))
@@ -203,13 +209,13 @@ class game:
       self.startingPlayer()         
             
       self.factory = EnemyFactory(self.SCREEN_WIDTH)         #---------------------
-      self.enemies = self.factory.create_enemies(6, 6)            #---------------------
+      self.enemies = self.factory.create_enemies(6, 6, self.level)            #---------------------
       self.inst_enemies = self.enemies[0]                    #---------------------
-      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,3)#se elige el patron de vuelo
+      self.inst_enemyMovement = EnemyMovement(self.inst_enemies,self.SCREEN_WIDTH, self.SCREEN_HEIGHT,self.patrones[self.level])#se elige el patron de vuelo
       #---------------------
       
       self.bullets = []
-      self.available_bonus_types = list(BonusType)  # Lista de tipos de bonos disponibles
+      self.available_bonus_types = [BonusType.SHIELD]#list(BonusType)  # Lista de tipos de bonos disponibles
       self.bonus_timer = 0
       self.bonus_interval = game.BONUS_TIME  # 30 segundos
 
@@ -231,7 +237,7 @@ class game:
 
       # Sounds
       volume = 0.10
-      self.gameMusic = pygame.mixer.Sound("Songs/Spectre Music.mp3")
+      self.gameMusic = pygame.mixer.Sound("Songs/music_1.mp3")
       self.gameMusic.set_volume(0.5)
 
       self.sound_bonus_extra_life = pygame.mixer.Sound("sounds/extra_life.wav")
@@ -243,7 +249,6 @@ class game:
       self.sound_bonus_shield = pygame.mixer.Sound("sounds/shield.wav")
       self.sound_bonus_shield.set_volume(volume)
 
-      self.gameMusic.play(-1)
       #argumentos para el control
       self.joystick = None
       self.v_axis = 0
@@ -292,7 +297,7 @@ class game:
             self.draw_and_update_all_entities(keys, self.h_axis, self.v_axis)
             self.collision_observer.update()    #Actualizar colisiones
             self.vibration_ps4()
- 
+
 
             if game.POINTS_TO_ADD > 0:
               self.inst_ship.add_points(game.POINTS_TO_ADD)
@@ -301,6 +306,10 @@ class game:
               # SET JSON (KEY, VALUE)
             pygame.display.flip()
             self.check_killed()
+
+            # AQUI VA  CAMBIO DE NIVEL
+            # MESSAGE DE FINILIZACION DE JUEGO SI LAS VIDAS =0 O SI ES TERMINO EL ULTIMO NIVEL
+            self.is_time_to_change()
             # IF TERMINO:
             #   PREMIACION = INITACION DE PREMACION()
   
@@ -308,12 +317,13 @@ class game:
       #No solo cambiar qué nave se utiliza, sino también la música y todas esas cosas
       try:
           if self.turno == 2:
+            temp_level = 0
             # Creación de una instancia de Ship y EnemyFactory
             temp_inst_ship = Ship(self.key1, 1)             #INDICE 0
             temp_factory = EnemyFactory(self.SCREEN_WIDTH)  #INDICE 1
-            temp_enemies = temp_factory.create_enemies(6, 6)  #INDICE 2
+            temp_enemies = temp_factory.create_enemies(6, 6, temp_level)  #INDICE 2
             temp_inst_enemies = temp_enemies[0]             #INDICE 3
-            temp_inst_enemyMovement = EnemyMovement(temp_inst_enemies, self.SCREEN_WIDTH, self.SCREEN_HEIGHT, 3)  # INDICE 4
+            temp_inst_enemyMovement = EnemyMovement(temp_inst_enemies, self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.patrones[temp_level])  # INDICE 4
             temp_inst_entities = []                         #INDICE 5
             temp_inst_entities.append(temp_inst_ship)
             temp_inst_entities.extend(temp_enemies[1])
@@ -334,16 +344,18 @@ class game:
                 temp_collision_observer,# INDICE 6
                 temp_setup_counter,     # INDICE 7
                 temp_t,                 # INDICE 8
-                temp_movement           # INDICE 9
+                temp_movement,           # INDICE 9
+                temp_level              # INDICE 10
             ]
 
             print("setup del jugador1 porque el jugador 2 empieza")
           elif self.turno == 1:
+            temp_level = 0
             temp_inst_ship = Ship(self.key2, 2)             #INDICE 0
             temp_factory = EnemyFactory(self.SCREEN_WIDTH)  #INDICE 1
-            temp_enemies = temp_factory.create_enemies(6, 6)  #INDICE 2
+            temp_enemies = temp_factory.create_enemies(6, 6, temp_level)  #INDICE 2
             temp_inst_enemies = temp_enemies[0]             #INDICE 3
-            temp_inst_enemyMovement = EnemyMovement(temp_inst_enemies, self.SCREEN_WIDTH, self.SCREEN_HEIGHT, 3)  # INDICE 4
+            temp_inst_enemyMovement = EnemyMovement(temp_inst_enemies, self.SCREEN_WIDTH, self.SCREEN_HEIGHT, self.patrones[temp_level])  # INDICE 4
             temp_inst_entities = []                         #INDICE 5
             temp_inst_entities.append(temp_inst_ship)
             temp_inst_entities.extend(temp_enemies[1])
@@ -352,6 +364,7 @@ class game:
             temp_setup_counter = 0                          #INDICE 8
             temp_t = 0                                      #INDICE 9
             temp_movement = False                           #INDICE 10
+
 
             # Lista de status del jugador
             self.player_2_Status = [
@@ -364,7 +377,8 @@ class game:
                 temp_collision_observer,# INDICE 6
                 temp_setup_counter,     # INDICE 7
                 temp_t,                 # INDICE 8
-                temp_movement           # INDICE 9
+                temp_movement,           # INDICE 9
+                temp_level              # INDICE 10
             ]
             print("setup del jugador2 porque el jugador 1 empieza")
           print("SETUP LISTO-------------------------->")
@@ -385,7 +399,8 @@ class game:
             self.collision_observer,  # INDICE 6
             self.setup_counter,       # INDICE 7
             self.t,                   # INDICE 8
-            self.movement             # INDICE 9
+            self.movement,             # INDICE 9
+            self.level
         ]
         
         # Cambiar de turno
@@ -402,6 +417,7 @@ class game:
         self.setup_counter = self.player_2_Status[7]
         self.t = self.player_2_Status[8]
         self.movement = self.player_2_Status[9]
+        self.level = self.player_2_Status[10]
         
         # Actualizar entidades para el jugador 2
         #self.inst_entities = []
@@ -420,7 +436,8 @@ class game:
             self.collision_observer,  # INDICE 6
             self.setup_counter,       # INDICE 7
             self.t,                   # INDICE 8
-            self.movement             # INDICE 9
+            self.movement,             # INDICE 9
+            self.level
         ]
         
         # Cambiar de turno
@@ -437,6 +454,7 @@ class game:
         self.setup_counter = self.player_1_Status[7]
         self.t = self.player_1_Status[8]
         self.movement = self.player_1_Status[9]
+        self.level = self.player_1_Status[10]
         
         # Actualizar entidades para el jugador 1
         #self.inst_entities = []
@@ -647,7 +665,7 @@ class game:
     self.screen.blit(ship_image, (ship_x, ship_y))
   #Dibujar el nivel actual
   def draw_level(self, font, text_color):
-    level_text = f"Level: {0}"
+    level_text = f"Level: {self.level}"
     text_surface = font.render(level_text, True, text_color)
     text_x =text_x = game.SCREEN_WIDTH - int(game.SCREEN_WIDTH * (1-0.105)) 
     text_y = game.SCREEN_HEIGHT - game.PADDING_MENU // 2 - text_surface.get_height() // 2
@@ -815,6 +833,14 @@ class game:
     if game.VIBRATION and game.CONTROLLER:
       self.joystick.rumble(1,1,1000)
       game.VIBRATION = False
+
+  def is_time_to_change(self):
+      if self.key2 is None:
+        return
+      else:
+         if game.CHANGE_PLAYER:
+            game.CHANGE_PLAYER = False
+            self.change_player()
      
 ### BONUS
 
@@ -869,29 +895,31 @@ class Shield(Collidable):
     PIXELS_FRONT_OF_SHIP = 40
     def __init__(self, x, y, hits=3):
         super().__init__()
-        self.image = pygame.image.load("Images/shield.png")  # Asegúrate de tener la imagen del escudo en la carpeta Images
+        self.image = pygame.image.load("Images/shield_3.png")  # Asegúrate de tener la imagen del escudo en la carpeta Images
         self.image = pygame.transform.scale(self.image, 
-                                            (Ship.WIDTH, int(0.25 * Ship.WIDTH)))
+                                            (Ship.WIDTH, int(Ship.WIDTH)))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y - Shield.PIXELS_FRONT_OF_SHIP)  # Ajusta la posición vertical del escudo según sea necesario
         self.hits = hits
         self.font = pygame.font.Font("fonts/GenericTechno.otf", 14) 
+        self.active = True
 
     def update(self, x, y):
         self.rect.center = (x, y - Shield.PIXELS_FRONT_OF_SHIP)  # Actualiza la posición del escudo según la posición de la nave
 
     def draw(self, screen):
+      if self.active and self.hits > 0:
+        self.image = pygame.image.load("Images/shield_" + str(self.hits) + ".png") 
+        self.image = pygame.transform.scale(self.image, 
+                                            (Ship.WIDTH, int( 0.25 * (self.hits) * Ship.WIDTH)))
         screen.blit(self.image, self.rect)
         level_text = str(self.hits)
-        text_surface = self.font.render(level_text, True, (0,0,0))  # Color del texto en blanco
+        text_surface = self.font.render(level_text, True, (255,0,255))  # Color del texto en blanco
         text_rect = text_surface.get_rect(center=self.rect.center)
         screen.blit(text_surface, text_rect)
 
     def on_collision(self, other):
-        if isinstance(other, Enemy):
-            self.hits -= 1
-            if self.hits <= 0:
-                self.kill()
+        print("Colisionando con:", other)
 
 
 ## BulletShip
@@ -953,7 +981,7 @@ class Enemy(Collidable):
   sound_enemy = pygame.mixer.Sound("sounds/enemy_death.wav")
   sound_enemy.set_volume(0.5)
 
-  def __init__(self,posx,posy):
+  def __init__(self,posx,posy, level):
     super().__init__()
     self.image = pygame.image.load("Images/enemy.png")
     self.image = pygame.transform.smoothscale(self.image, (40, 40))
@@ -1026,7 +1054,7 @@ class EnemyFactory:
         self.startx = screenWidth
         self.starty = -240
 
-    def create_enemies(self,row:int,col:int) -> tuple[list[list[Enemy]],list[Enemy]]:
+    def create_enemies(self,row:int,col:int, level) -> tuple[list[list[Enemy]],list[Enemy]]:
         enemies=[]
         enemies_aux=[]
         enemies_list:list[Enemy]=[]
@@ -1034,7 +1062,7 @@ class EnemyFactory:
         for i in range(row):
             self.startx = (self.screenWidth - (col * 90 - 45)) // 2
             for j in range(col):
-                enemies_aux.append(Enemy(self.startx, self.starty))
+                enemies_aux.append(Enemy(self.startx, self.starty, level))
                 self.startx+=90
 
             enemies.append(enemies_aux)
