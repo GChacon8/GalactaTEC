@@ -1,6 +1,7 @@
 import enum
 import pygame
 import tkinter as tk
+from tkinter import messagebox
 import itertools
 import os
 import sys
@@ -8,6 +9,8 @@ import random
 import menu
 import login
 import json
+import AnimatedGIF
+import ceremony
 
 from Enemy_movement import EnemyMovement
 from Observer import Collidable, CollisionObserver
@@ -290,8 +293,8 @@ class game:
              self.paused_events()
              self.show_Message()
              if self.key2 is not None:
-              puntaje1  = self.player_1_Status[0].points
-              puntaje2 = self.player_2_Status[0].points
+                puntaje1  = self.player_1_Status[0].points
+                puntaje2 = self.player_2_Status[0].points
              else:
                 puntaje1 = self.inst_ship.points
              pygame.quit()
@@ -315,19 +318,62 @@ class game:
             if game.POINTS_TO_ADD > 0:
               self.inst_ship.add_points(game.POINTS_TO_ADD)
               game.POINTS_TO_ADD = 0
-              # ACTUALIZAR JSON
-              # SET JSON (KEY, VALUE)
             pygame.display.flip()
             self.check_killed()
 
             self.change_level()
             # MESSAGE DE FINILIZACION DE JUEGO SI LAS VIDAS =0 O SI ES TERMINO EL ULTIMO NIVEL
             self.is_time_to_change()
+            # IF TERMINO:
+            #   PREMIACION = INITACION DE PREMACION()
       if self.key2 is not None:
-         print("PUNTUACION 1: ",puntaje1," PUNTUACION 2: ",puntaje2)
+        print("PUNTUACION 1: ",puntaje1," PUNTUACION 2: ",puntaje2)
+        winnner = "GANO: "
+        if puntaje1 > puntaje2:
+           winnner = "El JUEGADOR 1"
+        elif puntaje1 == puntaje2:
+           winnner = "NADIE POR EMPATE"
+        else:
+           winnner = "El JUEGADOR 2"
+        messagebox.showinfo("QUIEN GANO?", f"{winnner}. Felicidades!!")
+
       else:
-        print("PUNTUACION: ",puntaje1)
+        messagebox.showinfo("FIN DEL JUEGO", f"El jugador 1 ha terminado el juego")
+      self.updateJson(puntaje1, puntaje2)
+     
+     
+      window = tk.Tk()
+      window.title("GalactaTEC")
+      window.configure(bg="#120043")
+      window.geometry("800x600")
+
+      #Configuracion del fondo 
+      gif_path = "Images/space_background.gif"
+      self.animated_gif = AnimatedGIF.AnimatedGIF(window, gif_path)
+      self.animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
+      if self.key2 is not None:
+        win = ceremony.ceremony(window, self.animated_gif, self.key1, self.key2)
+      else:
+         return
+
       # LLAMAR CORACION
+  # Actualizacion de los puntos en la base de datos
+  def updateJson(self, puntaje1, puntaje2):
+    with open("data.json") as json_file:
+            data = json.load(json_file)
+
+    user1 = {'highscore': str(puntaje1)}
+    user2 = {'highscore': str(puntaje2)}
+            
+    for usuario in data:
+      if usuario["key"] == self.key1:
+         usuario.update(user1)
+      elif usuario["key"] == self.key2:
+         usuario.update(user2)
+     
+    with open("data.json", "w") as json_file:
+      json.dump(data, json_file, indent=4)
+  
   def setup_player2(self):
       #No solo cambiar qué nave se utiliza, sino también la música y todas esas cosas
       try:
@@ -897,7 +943,7 @@ class game:
     self.background_sprites.draw(self.screen)     
     self.inst_ship.draw(self.screen)
     self.draw_menu_game()
-    font = pygame.font.Font("fonts/GenericTechno.otf", 25)
+    font = pygame.font.Font("fonts/GenericTechno.otf", 12)
     text_surface = font.render(self.message, True, (255, 255, 255))
     text_x = (game.SCREEN_WIDTH - text_surface.get_rect().width) / 2
     text_y = (game.SCREEN_HEIGHT - text_surface.get_rect().height) / 2
