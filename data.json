@@ -21,7 +21,7 @@
         "ship": "Images/ships/ship3.png",
         "music": "",
         "highscore": "1000",
-        "lastScore": 1000
+        "lastScore": 0
     },
     {
         "key": 3,

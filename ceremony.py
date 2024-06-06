@@ -105,7 +105,7 @@ class ceremony:
             self.pic1.config(image=ppPhoto1)
             self.pic1.image = ppPhoto1
 
-        self.btnBack = tk.Button(self.window, text=" Go Back ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.goBack)
+        self.btnBack = tk.Button(self.window, text="Back to Menu", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.goBack)
         self.btnBack.place(relx=0.5, rely=0.85, anchor="center") 
 
         self.play_music(song_list)
