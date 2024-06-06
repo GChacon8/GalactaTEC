@@ -75,9 +75,6 @@ class gameConfiguration:
             1+niveles.index(self.savedConfig[2]),
         ]
 
-        if not all(1 <= x <= 3 for x in init_menu.PATRONES):
-            init_menu.PATRONES = [1, 2, 3]
-
 
         self.clear_win()
         import menu

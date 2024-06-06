@@ -14,6 +14,8 @@ class EnemyMovement:
         self.enemigo_random = None #Para patron 3
         self.y_coord_inicial = 0
         self.goingdown = True
+        self.temp_filas =[]
+
 
         
 
@@ -30,7 +32,7 @@ class EnemyMovement:
         elif self.patron == 4:
             self.pattern_4()
         elif self.patron == 5:
-            self.pattern_5()
+            self.pattern_X()
         else:
             print("Patron indefinido")
             self.pattern_1
@@ -105,10 +107,36 @@ class EnemyMovement:
             self.pattern_2()
             
     def pattern_4(self):
-        pass
+        #self.pattern_1()  #Se puede seleccionar el patrón 1 o 2 para que vaya movimiento
+        if self.contador == 0:
+            try:
+                self.temp_filas = []
+                for i in self.inst_enemies[random.randint(0,5)]:
+                    self.temp_filas.append(i)
+        
+                self.y_coord_inicial = self.temp_filas[0].get_y_coords()
+                self.goingdown = True
+                self.contador = 1 #cambiar el contador para que salga de esta condicin
+            except Exception as e:
+                print(e)
+                # print("No hay enemigos vivos")
+                
+    
+        elif self.temp_filas[0].get_y_coords() < self.screenHeight-100 and self.goingdown:
+            for i in self.temp_filas:
+                i.move_down(10)
+        
+        elif self.temp_filas[0].get_y_coords() > self.y_coord_inicial and not self.goingdown:
+            for i in self.temp_filas:
+                i.move_up(10)
 
-    def pattern_5(self):
-        pass
+        elif self.temp_filas[0].get_y_coords() >= self.screenHeight-100:
+            self.goingdown = False
+            
+        else:
+            
+            self.contador = random.randint(0, 149)
+            self.pattern_2()
 
     #cada fila se mueve lateralmente de forma independiente (es caótico)
     def pattern_X(self):
@@ -124,15 +152,15 @@ class EnemyMovement:
     def pattern_X_aux_R(self, fila):
         for i in self.inst_enemies[fila]:                
             if i.get_x_coords() >= self.screenWidth-120 and i.is_alive():
-                self.Patter_X_Bools[fila] = not self.Patter_X_Bools[fila] 
-            i.move_rigth() 
+                i.move(0,i.get_y_coords()) 
+            
+            i.move_rigth(10) 
 
     def pattern_X_aux_L(self, fila):
         for i in self.inst_enemies[fila]:
-            if i.get_x_coords() <= 80 and i.is_alive():
-                self.Patter_X_Bools[fila] = not self.Patter_X_Bools[fila]
-            i.move_left()  
+            if i.get_x_coords() <= 60 and i.is_alive():
+                i.move(self.screenWidth,i.get_y_coords())
+            i.move_left(10)  
 
 #probar crear patron de invertir la piramide
 #que todas bajen en conjunto
-
