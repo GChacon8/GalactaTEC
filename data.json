@@ -20,8 +20,8 @@
         "photo": "Images/pp3.jpg",
         "ship": "Images/ships/ship3.png",
         "music": "",
-        "highscore": "0",
-        "lastScore": 0
+        "highscore": "1000",
+        "lastScore": 1000
     },
     {
         "key": 3,
@@ -32,8 +32,8 @@
         "photo": "Images/pp4.jpg",
         "ship": "Images/ships/ship2.png",
         "music": null,
-        "highscore": "5600",
-        "lastScore": 0
+        "highscore": "6800",
+        "lastScore": 200
     },
     {
         "key": 4,

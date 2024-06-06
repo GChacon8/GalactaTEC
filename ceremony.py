@@ -28,6 +28,7 @@ class ceremony:
         with open("data.json") as json_file:
             self.data = json.load(json_file)
 
+
         for user in self.data:
             if(user["key"] == self.key1):
                 self.score1 = user["highscore"]
@@ -38,63 +39,78 @@ class ceremony:
                 self.pp2 = user["photo"]
                 self.user2 = user["username"]
 
-        if(int(self.score1) < int(self.score2)):
-            self.score1, self.score2 = self.score2, self.score1
-            self.pp1, self.pp2 = self.pp2, self.pp1
-            self.user1, self.user2 = self.user2, self.user1
+        if(self.key2 != None):
+            if(int(self.score1) < int(self.score2)):
+                self.score1, self.score2 = self.score2, self.score1
+                self.pp1, self.pp2 = self.pp2, self.pp1
+                self.user1, self.user2 = self.user2, self.user1
 
-        # Primer lugar
-        self.lbl_first = tk.Label(self.window, text="┌── •✧• ──┐\n1st\n└── •✧• ──┘", font=("Fixedsys", 15), bg="#120043", fg="white")
-        self.lbl_first.place(relx=0.35, rely=0.65, anchor="center")
+            # Primer lugar
+            self.lbl_first = tk.Label(self.window, text="┌── •✧• ──┐\n1st\n└── •✧• ──┘", font=("Fixedsys", 15), bg="#120043", fg="white")
+            self.lbl_first.place(relx=0.35, rely=0.65, anchor="center")
 
-        self.lbl_user1 = tk.Label(self.window, text= self.user1, font=("Fixedsys", 15), bg="#120043", fg="white")
-        self.lbl_user1.place(relx=0.35, rely=0.5, anchor="center")
+            self.lbl_user1 = tk.Label(self.window, text= self.user1, font=("Fixedsys", 15), bg="#120043", fg="white")
+            self.lbl_user1.place(relx=0.35, rely=0.5, anchor="center")
 
-        self.lbl_score1 = tk.Label(self.window, text= self.score1, font=("Fixedsys", 20), bg="#120043", fg="white")
-        self.lbl_score1.place(relx=0.35, rely=0.55, anchor="center")
+            self.lbl_score1 = tk.Label(self.window, text= self.score1, font=("Fixedsys", 20), bg="#120043", fg="white")
+            self.lbl_score1.place(relx=0.35, rely=0.55, anchor="center")
 
-        self.pic1 = tk.Label(self.window, background="#2b5a81")
-        self.pic1.grid(row=0, column=0, padx=0, pady=0)
-        self.pic1.place(relx=0.35, rely=0.4, anchor="center")
+            self.pic1 = tk.Label(self.window, background="#2b5a81")
+            self.pic1.grid(row=0, column=0, padx=0, pady=0)
+            self.pic1.place(relx=0.35, rely=0.4, anchor="center")
 
-        ppImage1 = Image.open(self.pp1).resize((100,100))
-        ppPhoto1 = ImageTk.PhotoImage(ppImage1)
+            ppImage1 = Image.open(self.pp1).resize((100,100))
+            ppPhoto1 = ImageTk.PhotoImage(ppImage1)
 
-        self.pic1.config(image=ppPhoto1)
-        self.pic1.image = ppPhoto1
+            self.pic1.config(image=ppPhoto1)
+            self.pic1.image = ppPhoto1
 
-        #Second place
-        self.lbl_second = tk.Label(self.window, text="┌── •✧• ──┐\n2nd\n└── •✧• ──┘", font=("Fixedsys", 15), bg="#120043", fg="white")
-        self.lbl_second.place(relx=0.65, rely=0.65, anchor="center")
+            #Second place
+            self.lbl_second = tk.Label(self.window, text="┌── •✧• ──┐\n2nd\n└── •✧• ──┘", font=("Fixedsys", 15), bg="#120043", fg="white")
+            self.lbl_second.place(relx=0.65, rely=0.65, anchor="center")
 
-        self.lbl_user2 = tk.Label(self.window, text= self.user2, font=("Fixedsys", 15), bg="#120043", fg="white")
-        self.lbl_user2.place(relx=0.65, rely=0.5, anchor="center")
+            self.lbl_user2 = tk.Label(self.window, text= self.user2, font=("Fixedsys", 15), bg="#120043", fg="white")
+            self.lbl_user2.place(relx=0.65, rely=0.5, anchor="center")
 
-        self.lbl_score2 = tk.Label(self.window, text= self.score2, font=("Fixedsys", 20), bg="#120043", fg="white")
-        self.lbl_score2.place(relx=0.65, rely=0.55, anchor="center")
+            self.lbl_score2 = tk.Label(self.window, text= self.score2, font=("Fixedsys", 20), bg="#120043", fg="white")
+            self.lbl_score2.place(relx=0.65, rely=0.55, anchor="center")
 
-        self.pic2 = tk.Label(self.window, background="#2b5a81")
-        self.pic2.grid(row=0, column=0, padx=0, pady=0)
-        self.pic2.place(relx=0.65, rely=0.4, anchor="center")
+            self.pic2 = tk.Label(self.window, background="#2b5a81")
+            self.pic2.grid(row=0, column=0, padx=0, pady=0)
+            self.pic2.place(relx=0.65, rely=0.4, anchor="center")
 
-        ppImage2 = Image.open(self.pp2).resize((100,100))
-        ppPhoto2 = ImageTk.PhotoImage(ppImage2)
+            ppImage2 = Image.open(self.pp2).resize((100,100))
+            ppPhoto2 = ImageTk.PhotoImage(ppImage2)
 
-        self.pic2.config(image=ppPhoto2)
-        self.pic2.image = ppPhoto2
+            self.pic2.config(image=ppPhoto2)
+            self.pic2.image = ppPhoto2
+
+        else:
+            self.lbl_first = tk.Label(self.window, text="┌── •✧• ──┐\nGame Score\n└── •✧• ──┘", font=("Fixedsys", 15), bg="#120043", fg="white")
+            self.lbl_first.place(relx=0.5, rely=0.65, anchor="center")
+
+            self.lbl_user1 = tk.Label(self.window, text= self.user1, font=("Fixedsys", 15), bg="#120043", fg="white")
+            self.lbl_user1.place(relx=0.5, rely=0.5, anchor="center")
+
+            self.lbl_score1 = tk.Label(self.window, text= self.score1, font=("Fixedsys", 20), bg="#120043", fg="white")
+            self.lbl_score1.place(relx=0.5, rely=0.55, anchor="center")
+
+            self.pic1 = tk.Label(self.window, background="#2b5a81")
+            self.pic1.grid(row=0, column=0, padx=0, pady=0)
+            self.pic1.place(relx=0.5, rely=0.4, anchor="center")
+
+            ppImage1 = Image.open(self.pp1).resize((100,100))
+            ppPhoto1 = ImageTk.PhotoImage(ppImage1)
+
+            self.pic1.config(image=ppPhoto1)
+            self.pic1.image = ppPhoto1
+
+        self.btnBack = tk.Button(self.window, text=" Go Back ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.goBack)
+        self.btnBack.place(relx=0.5, rely=0.85, anchor="center") 
 
         self.play_music(song_list)
 
         self.window.mainloop()
-
-
-    def goToHall(self):
-        pygame.mixer.quit()
-        self.clear_win()
-        hall = hallofFame.hallofFame(self.window, self.animated_gif, self.key1)
-        hall.key1 = self.key1
-        hall.key2 = self.key2
-
 
     # Función para reproducir música
     def play_music(self, song):
@@ -106,6 +122,17 @@ class ceremony:
         for widget in self.window.winfo_children():
             if widget != self.animated_gif:
                 widget.destroy()
+
+    def goBack(self):
+        self.clear_win()
+        import menu
+        if(self.key2 == None): #juego individual
+            win = menu.init_menu(self.window, self.animated_gif, self.key1)
+            win.showMenu()
+        else: #multijugador
+            win = menu.init_menu(self.window, self.animated_gif, self.key1)
+            win.multiplayer(self.key1, self.key2)
+            win.showMenu()
 
 
 
