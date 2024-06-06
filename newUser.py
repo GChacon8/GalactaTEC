@@ -99,15 +99,11 @@ class newUser:
         #modificar usuario
         else:
             self.setOriginalValues()
-            self.btnCancel = tk.Button(self.window, text=" Cancel ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.createUser)
+            self.btnCancel = tk.Button(self.window, text=" Cancel ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.goBack)
             self.btnCancel.place(relx=0.35, rely=0.8, anchor="center") 
             
             self.btnCreate = tk.Button(self.window, text=" ★ Save Changes ★ ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.saveChanges)
             self.btnCreate.place(relx=0.6, rely=0.8, anchor="center")
-
-        self.btnBack = tk.Button(self.window, text=" Go Back ", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.goBack)
-        self.btnBack.place(relx=0.5, rely=0.9, anchor="center") 
-
 
         self.window.mainloop()
 
@@ -233,6 +229,7 @@ class newUser:
         email = self.entry_email.get()
         ship = self.ship_images[self.current_index]
         password = self.entry_password.get()
+        code = self.entry_verify.get()
 
         if not self.filename:
             photo = None
@@ -245,7 +242,7 @@ class newUser:
             music = self.music_file
 
         
-        if not username or not password or not fullname or not email:
+        if not username or not password or not fullname or not email or not code:
             messagebox.showwarning("Warning", "Please fill all the data to create your user")
             return
 
@@ -259,9 +256,14 @@ class newUser:
                     messagebox.showwarning("Warning", "This email has already been registered")
                     return
             
-        if self.email != email:
-            messagebox.showwarning("Error", "The email address entered is not valid, please try again")
+        # Verifica que el usuario no cambie el correo despues de la validacion
+        if self.validatedEmail != email:
+            messagebox.showwarning("Error", "The email address entered has not been validated")
             return
+        
+        if code != self.code:
+            messagebox.showerror("Error", "The code entered for email validation is incorrect")
+            return 
         
         if self.verify_password(password) == False:
             messagebox.showwarning("Error", "Password must have:\n- Minimum 7 characters\n- You must use at least one capital letter\n- You must use at least one special symbol\n- You must use at least one number\n- You must use at least one lowercase letter")
@@ -309,18 +311,24 @@ class newUser:
         else:
             music = self.music_file
 
-        
-        if not username or not password or not fullname or not email or not code:
+        if not username or not password or not fullname or not email:
             messagebox.showwarning("Warning", "Please fill all the data to create your user")
             return
         
-        if self.email == email:
-            messagebox.showwarning("Error", "The email address entered is not valid, please try again")
-            return
-        
-        if code != self.code:
-            messagebox.showerror("Error", "The code entered for email validation is incorrect")
-            return 
+        for usuario in self.data:
+            if(usuario["key"] == self.key):
+                # En caso de que el usuario haya cambiado el correo
+                if(usuario["email"] != email):
+                    if(not code):
+                        messagebox.showwarning("Warning", "Missing code for new email")
+                        return
+                    # Verifica que el usuario no cambie el correo despues de la validacion
+                    if self.validatedEmail != email:
+                        messagebox.showwarning("Error", "The email address entered has not been validated, please try again")
+                        return
+                    if code != self.code:
+                        messagebox.showerror("Error", "The code entered for email validation is incorrect")
+                        return 
         
         if self.verify_password(password) == False:
             messagebox.showwarning("Error", "Password must have:\n- Minimum 7 characters\n- You must use at least one capital letter\n- You must use at least one special symbol\n- You must use at least one number\n- You must use at least one lowercase letter")
@@ -339,12 +347,14 @@ class newUser:
         with open("data.json") as json_file:
             data = json.load(json_file)
             
-        for usuario in self.data:
+        for usuario in data:
             if usuario["key"] == self.key:
                 usuario.update(user) 
 
         with open("data.json", "w") as json_file:
             json.dump(data, json_file, indent=4)
+
+        messagebox.showinfo("Info", "Your changes have been saved")        
         
 
     def verify_password(self, password):
@@ -373,6 +383,7 @@ class newUser:
     def validateEmail(self):
         destination = self.entry_email.get()
 
+        #Caso nuevo usuario
         if(self.key == 0):
             for usuario in self.data:
                 if usuario["email"] == destination:
@@ -386,8 +397,7 @@ class newUser:
             # Enviar el correo electrónico
             yag.send(to=destination, subject='Welcome to GalactaTEC', contents='To validate your email adress for GalactaTEC please enter the code ' + self.generate_code() + ' when creating your user')
 
-            self.email = destination
-            print(self.email)
+            self.validatedEmail = destination
 
             messagebox.showinfo("Info", "You have received a validation code")
             return True
