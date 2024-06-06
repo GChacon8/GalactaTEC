@@ -326,7 +326,7 @@ class game:
                 puntaje2 = self.player_2_Status[0].points
              else:
                 puntaje1 = self.inst_ship.points
-             pygame.quit()
+             pygame.display.flip()
              break
           else: #Jugando Ando
             self.generate_bonus()               #Generar bonos de forma aleatoria
@@ -368,6 +368,8 @@ class game:
 
       else:
         messagebox.showinfo("FIN DEL JUEGO", f"El jugador 1 ha terminado el juego")
+      pygame.quit()
+      
       self.updateJson(puntaje1, puntaje2)
      
      
