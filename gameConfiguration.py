@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from menu import  init_menu
 
 
 class gameConfiguration:
@@ -30,24 +31,21 @@ class gameConfiguration:
 
     
     def show(self):
-        # Botón para retroceder
         btnBack = tk.Button(self.window, text="Save And Close", font=("Fixedsys", 15), background="#52112f", fg="white", command=self.goBack)
         btnBack.place(relx=0.5, rely=0.9, anchor="center")
 
-
-        #Style of the combobox
         style = ttk.Style()
         style.theme_use('default')
         style.configure('TCombobox', background='#52112f', fieldbackground='#FFFFCC', foreground="black", selectbackground="#FFFFCC", selectforeground="black")
-        start_x = 0.5 - (3 * 165 / 2) / self.SCREEN_WIDTH  # Iniciar x desde el centro
+        start_x = 0.5 - (3 * 165 / 2) / self.SCREEN_WIDTH
         self.combobox_patrones = []
+        niveles = ["Pattern 1", "Pattern 2", "Pattern 3", "Pattern 4", "Pattern 5"]
+        default_patterns = ["Pattern 1", "Pattern 2", "Pattern 3"]
         for i in range(3):
             label = tk.Label(self.window, text="Nivel "+str(i+1), font=("Fixedsys", 18), bg="#120043", fg="white")
             label.place(relx=start_x + i * 250 / self.SCREEN_WIDTH, rely=0.4, anchor="center")
-
-            niveles = ["Pattern 1", "Pattern 2", "Pattern 3", "Pattern 4", "Pattern 5"]
-            self.nivel_seleccionado = tk.StringVar(self.window)
-            combobox_nivel = ttk.Combobox(self.window, textvariable=self.nivel_seleccionado, values=niveles, font=("Fixedsys", 13), state="readonly",width=9)
+            combobox_nivel = ttk.Combobox(self.window, values=niveles, font=("Fixedsys", 13), state="readonly", width=9)
+            combobox_nivel.set(default_patterns[i])
             combobox_nivel.place(relx=start_x + i * 250 / self.SCREEN_WIDTH, rely=0.5, anchor="center")
             self.combobox_patrones.append(combobox_nivel)
 
@@ -57,7 +55,7 @@ class gameConfiguration:
         for i in range(3):
             nivel = "Nivel " + str(i+1)
             patron = self.combobox_patrones[i].get()
-            self.savedConfig.append([nivel, patron])
+            self.savedConfig.append(patron)
 
     
     def clear_win(self):
@@ -68,7 +66,19 @@ class gameConfiguration:
 
     def goBack(self):
         self.obtener_informacion()
-        print("Los datos de juego son-> ",self.savedConfig)
+        # print("Los datos de juego son-> ",self.savedConfig)
+        niveles = ["Pattern 1", "Pattern 2", "Pattern 3", "Pattern 4", "Pattern 5"]
+
+        init_menu.PATRONES = [
+            1+niveles.index(self.savedConfig[0]),
+            1+niveles.index(self.savedConfig[1]),
+            1+niveles.index(self.savedConfig[2]),
+        ]
+
+        if not all(1 <= x <= 3 for x in init_menu.PATRONES):
+            init_menu.PATRONES = [1, 2, 3]
+
+
         self.clear_win()
         import menu
         if(self.key2 == 0): #juego individual

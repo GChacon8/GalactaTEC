@@ -6,6 +6,8 @@ from GalactaTEC import game
 import pygame
 
 class init_menu:
+  PATRONES = [1,2,3]
+
   def __init__(self, window, animated_gif, key):
     self.key = key 
     self.key1 = key
@@ -126,11 +128,11 @@ class init_menu:
   def initGame(self, key1, key2):
     self.window.destroy()
     if key2 == 0:
-      inst_game = game(key1)
+      inst_game = game(key1, None, init_menu.PATRONES )
       inst_game.run()
     else:
-        inst_game = game(key1, key2)
-        inst_game.run()
+      inst_game = game(key1, key2, init_menu.PATRONES )
+      inst_game.run()
 
       # Función para reproducir música
   def play_music(self):

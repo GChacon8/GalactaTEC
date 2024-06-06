@@ -60,6 +60,24 @@ class Ship (Collidable):
     self.invulnerable_time = 0
     self.double_points_time = 0
 
+    # Cargar la imagen de sprites
+    sprite_sheet = pygame.image.load("Images/aura_sprites.png")  
+    # Dimensiones del sprite individual
+    sprite_width = 65
+    sprite_height = 65
+
+    # Lista para almacenar cada sprite
+    self.sprites = []
+
+    # Suponiendo que los sprites  alineados horizontalmente
+    for i in range(6):  # Cambia el 6 por el número de sprites si es diferente
+        # Definir el rectángulo para recortar el sprite
+        rect = pygame.Rect(i * sprite_width, 0, sprite_width, sprite_height)
+        # Recortar el sprite y añadirlo a la lista
+        sprite = sprite_sheet.subsurface(rect)
+        self.sprites.append(sprite)
+    self.counter_aura = 0
+
 
     # Aviable Bullet Type 
     self.bullet_types = [BulletShipType.SIMPLE]  # Por defecto, solo tiene balas simples
@@ -70,6 +88,11 @@ class Ship (Collidable):
   def update(self, keys, h_axis, v_axis):
     if self.invulnerable_time > 0:
       self.invulnerable_time -= 1
+    if self.double_points_time > 0:
+      self.double_points_time -= 1
+      self.points_multiplier = 2 if self.double_points_time > 0 else 1
+
+
     if keys[pygame.K_LEFT] or h_axis<-0.5:
       self.rect.x -= self.speed
     if keys[pygame.K_RIGHT] or h_axis>0.5:
@@ -83,6 +106,14 @@ class Ship (Collidable):
     self.rect.y = max(0, min(self.rect.y, game.SCREEN_HEIGHT - self.rect.height-50))
   def draw(self, screen: pygame.Surface):
       if self.active:
+          if self.double_points_time > 0:
+            aura = self.sprites[self.counter_aura]
+            aura = pygame.transform.smoothscale(aura, (2 * Ship.WIDTH, 2 * Ship.WIDTH))
+            offset = Ship.WIDTH // 2
+            offset = int(offset)
+            aura_position = (self.rect.x - offset, self.rect.y - offset)
+            self.counter_aura = (self.counter_aura + 1) % len(self.sprites)
+            screen.blit(aura, aura_position)
           if self.invulnerable_time > 0:
               # Hacer la nave semi-transparente durante la invulnerabilidad
               alpha = 32 if self.invulnerable_time % 20 < 10 else 255
@@ -134,8 +165,7 @@ class Ship (Collidable):
     return self.points
   def add_points(self, points=200):
     self.points += points * self.points_multiplier
-    if self.points_multiplier != 1:
-      self.points_multiplier = 1
+
   def bonus_colleted(self):
     return self.bonus_colleted
   def desactive(self):
@@ -185,9 +215,10 @@ class game:
   CONTROLLER = False
   CHANGE_PLAYER = False
 
-  def __init__(self, key1, key2 = None):
+  def __init__(self, key1, key2,patron):
       self.level = 0
-      self.patrones = [3,2,1]
+      self.patrones = patron
+      print("Patrones:", self.patrones)
 
 
 
@@ -241,17 +272,15 @@ class game:
       
 
       # Sounds
-      volume = 0.10
       self.chose_song(self.level)
 
       self.sound_bonus_extra_life = pygame.mixer.Sound("sounds/extra_life.wav")
-      self.sound_bonus_extra_life.set_volume(volume)
+      self.sound_bonus_extra_life.set_volume(0.25)
 
       self.sound_bonus_double_points = pygame.mixer.Sound("sounds/double_points.wav")
-      self.sound_bonus_double_points.set_volume(volume)
 
       self.sound_bonus_shield = pygame.mixer.Sound("sounds/shield.wav")
-      self.sound_bonus_shield.set_volume(volume)
+      self.sound_bonus_shield.set_volume(0.5)
 
       #argumentos para el control
       self.joystick = None
@@ -297,7 +326,7 @@ class game:
                 puntaje2 = self.player_2_Status[0].points
              else:
                 puntaje1 = self.inst_ship.points
-             pygame.quit()
+             pygame.display.flip()
              break
           else: #Jugando Ando
             self.generate_bonus()               #Generar bonos de forma aleatoria
@@ -330,15 +359,17 @@ class game:
         print("PUNTUACION 1: ",puntaje1," PUNTUACION 2: ",puntaje2)
         winnner = "GANO: "
         if puntaje1 > puntaje2:
-           winnner = "El JUEGADOR 1"
+           winnner = "El JUGADOR 1" + ". Con un puntaje de: " + str(puntaje1)
         elif puntaje1 == puntaje2:
-           winnner = "NADIE POR EMPATE"
+           winnner = "NADIE POR EMPATE" + ". Con un puntaje de: " + str(puntaje1)
         else:
-           winnner = "El JUEGADOR 2"
+           winnner = "El JUGADOR 2" + ". Con un puntaje de: " + str(puntaje1)
         messagebox.showinfo("QUIEN GANO?", f"{winnner}. Felicidades!!")
 
       else:
         messagebox.showinfo("FIN DEL JUEGO", f"El jugador 1 ha terminado el juego")
+      pygame.quit()
+      
       self.updateJson(puntaje1, puntaje2)
      
      
@@ -578,6 +609,9 @@ class game:
       elif event.type == pygame.JOYBUTTONDOWN:
         if event.button == 6:
           self.paused = False
+      elif event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_c:
+          self.paused = not self.paused
   #Revisar los eventos del juego
   def game_events(self):
         for event in pygame.event.get():
@@ -593,6 +627,8 @@ class game:
                     if bullet:
                         self.inst_entities.append(bullet)
                         self.collision_observer.register([bullet])
+                elif event.key == pygame.K_c:
+                   self.paused = not self.paused
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.button_rect.collidepoint(mouse_pos):
@@ -693,7 +729,8 @@ class game:
               self.sound_bonus_shield.play()
               active_bonuses.pop(0)
           elif selected_bonus.type == BonusType.DOUBLE_POINTS:
-             self.inst_ship.points_multiplier = 2
+             self.inst_ship.double_points_time = Ship.DOUBLE_POINTS_TIME * game.FRAME_RATE 
+             self.sound_bonus_double_points.play()
              self.inst_ship.bonus_colleted.pop(0)
           else:
               active_bonuses.pop(0)
@@ -989,7 +1026,9 @@ class game:
       self.bonus_interval = game.BONUS_TIME  # 30 segundos
 
       self.inst_ship.shield = None          
-      self.inst_ship.bonus_colleted = []   
+      self.inst_ship.bonus_colleted = []
+      self.inst_ship.double_points_time = 0
+      self.inst_ship.invulnerable_time = 0   
       self.inst_entities = []                           
       self.inst_entities.append(self.inst_ship)         
       self.inst_entities.extend(self.enemies[1])
