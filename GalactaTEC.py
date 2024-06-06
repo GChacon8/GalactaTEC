@@ -294,7 +294,6 @@ class game:
            
       
 
-
       ## time for shooting enemy's bullets
       self.time_since_last_shot = 0  # ms desde el último disparo
       self.message = ""
@@ -369,7 +368,11 @@ class game:
       else:
         messagebox.showinfo("FIN DEL JUEGO", f"El jugador 1 ha terminado el juego")
       pygame.quit()
-      
+
+      pygame.init()
+      pygame.mixer.init()
+
+
       self.updateJson(puntaje1, puntaje2)
      
      
@@ -1165,17 +1168,6 @@ class BulletShip(Collidable):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 ############ Clase Enemy ##############
 
 class Enemy(Collidable):
@@ -1204,10 +1196,6 @@ class Enemy(Collidable):
   def move(self, x, y):
     self.rect.x = x
     self.rect.y = y
-
-    # Limitar la nave dentro de los límites de la pantalla
-    self.rect.x = max(0, min(self.rect.x, 800 - self.rect.width))
-    self.rect.y = max(0, min(self.rect.y, 600 - self.rect.height))
 
   def move_rigth(self,num):
      self.rect.x += num
