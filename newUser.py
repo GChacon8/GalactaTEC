@@ -167,6 +167,7 @@ class newUser:
     def shipsCarousel(self):
         self.ship_images = [
             "Images/ships/ship1.png",
+            "Images/ships/ship2.png",
             "Images/ships/ship3.png",
             "Images/ships/ship4.png"
         ]

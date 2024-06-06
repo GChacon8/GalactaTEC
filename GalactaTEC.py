@@ -380,24 +380,24 @@ class game:
       gif_path = "Images/space_background.gif"
       self.animated_gif = AnimatedGIF.AnimatedGIF(window, gif_path)
       self.animated_gif.place(x=0, y=0, relwidth=1, relheight=1)
-      if self.key2 is not None:
-        win = ceremony.ceremony(window, self.animated_gif, self.key1, self.key2)
-      else:
-         return
+      win = ceremony.ceremony(window, self.animated_gif, self.key1, self.key2)
 
       # LLAMAR CORACION
   # Actualizacion de los puntos en la base de datos
   def updateJson(self, puntaje1, puntaje2):
     with open("data.json") as json_file:
             data = json.load(json_file)
-
-    user1 = {'highscore': str(puntaje1)}
-    user2 = {'highscore': str(puntaje2)}
             
     for usuario in data:
       if usuario["key"] == self.key1:
+         totalScore = str(int(usuario["highscore"]) + puntaje1)
+         user1 = {'lastScore': puntaje1,
+                  'highscore': totalScore}
          usuario.update(user1)
       elif usuario["key"] == self.key2:
+         totalScore = str(int(usuario["highscore"]) + puntaje2)
+         user2 = {'lastScore': puntaje2,
+                  'highscore': totalScore}
          usuario.update(user2)
      
     with open("data.json", "w") as json_file:
