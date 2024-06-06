@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 import threading
 import AnimatedGIF
@@ -43,7 +44,7 @@ class init_menu:
 
     self.btnHelp = tk.Button(self.window, text="How To Play", font=("Fixedsys", 15), command=self.howToPlay)
 
-    self.btnExit = tk.Button(self.window, text="Exit", font=("Fixedsys", 15), command=self.clear_win) 
+    self.btnExit = tk.Button(self.window, text="Exit", font=("Fixedsys", 15), command=self.exit) 
 
     if self.key2 == 0:
       self.btnInitP2 = tk.Button(self.window, text="Start Player 2", font=("Fixedsys", 15), command=self.initPlayer2)
@@ -139,4 +140,7 @@ class init_menu:
     if self.song:
         pygame.mixer.music.load(self.song)  
         pygame.mixer.music.play(-1)  # Reproducir en bucle
+  
+  def exit(self):
+     sys.exit()
     

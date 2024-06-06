@@ -37,7 +37,8 @@ class Recover:
     def cancel(self):
         self.clear_win()
         import login
-        login.login(self.window, self.animated_gif)
+        win = login.login(self.window, self.animated_gif)
+        win.showLogin()
 
     def verifyWindow(self):
         self.emailLbl.destroy()
